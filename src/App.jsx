@@ -6,7 +6,7 @@ const App = () => {
   return (
     <div>
       <Navbar />
-      {/* Other components can be added here */}
+      {/* Other components can be added here  h*/}
       <Home />
     </div>
   );
