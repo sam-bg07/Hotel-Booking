@@ -1,11 +1,12 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
 
 const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Products", path: "/products" },
-    { name: "Contact", path: "/contact" },
+    { name: "Hotels", path: "/hotels" },
+    { name: "Experience", path: "/experience" },
     { name: "About", path: "/about" },
   ];
 
@@ -22,7 +23,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 bg-amber-900 w-full h-20 flex items-center justify-between  md:px-16 lg:px-24 xl:px-24 transition-all duration-450 z-50 ${
+      className={`fixed top-0 left-0  w-full h-20 flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-24 transition-all duration-450 z-50 ${
         isScrolled
           ? "bg-white/80 h-10 shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4 "
           : "py-4 md:py-6"
@@ -32,14 +33,14 @@ const Navbar = () => {
       {/* Logo */}
       <NavLink to="/" className="flex items-center gap-2">
         <img
-          src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoWhite.svg"
+          src={assets.logo}
           alt="logo"
           className={`h-9 ${isScrolled && "invert opacity-80"}`}
         />
       </NavLink>
 
       {/* Desktop Nav */}
-      <div className="hidden md:flex items-center gap-4 lg:gap-8">
+      <div className="hidden md:flex items-center gap-4 m-2 lg:gap-8">
         {navLinks.map((link, i) => (
           <NavLink
             key={i}
@@ -47,7 +48,7 @@ const Navbar = () => {
             className={({ isActive }) =>
               `group flex flex-col gap-0.5 ${
                 isScrolled ? "text-gray-700" : "text-white"
-              } ${isActive ? "font-semibold" : ""}`
+              } ${isActive ? "font-semibold text-black" : ""}`
             }
           >
             {link.name}
@@ -63,22 +64,17 @@ const Navbar = () => {
             isScrolled ? "text-black" : "text-white"
           } transition-all`}
         >
-          New Launch
+          Dashboard
         </button>
       </div>
 
       {/* Desktop Right */}
       <div className="hidden md:flex items-center gap-4">
-        <svg
-          className={`h-6 w-6 ${isScrolled ? "invert" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
+        <img
+          src={assets.searchIcon}
+          alt="searchIcon"
+          className={`h-9 ${isScrolled && "invert opacity-80"}`}
+        />
         <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
           Login
         </button>
