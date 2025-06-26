@@ -4,7 +4,7 @@ import Home from "./components/Home";
 
 const App = () => {
   return (
-    <div className="h-screen ">
+    <div>
       <Navbar />
       {/* Other components can be added here */}
       <Home />
