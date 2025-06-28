@@ -1,8 +1,12 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { use } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
 import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
+import { useClerk, useUser, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
 
 const Navbar = () => {
+  const { openSignIn } = useClerk();
+  const { user } = useUser();
+  const navigate = useNavigate();
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Hotels", path: "/hotels" },
@@ -59,13 +63,15 @@ const Navbar = () => {
             />
           </NavLink>
         ))}
-        <button
-          className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
-            isScrolled ? "text-black" : "text-white"
-          } transition-all`}
-        >
-          Dashboard
-        </button>
+        {user && (
+          <button
+            className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
+              isScrolled ? "text-black" : "text-white"
+            } transition-all`}
+          >
+            Dashboard
+          </button>
+        )}
       </div>
 
       {/* Desktop Right */}
@@ -75,13 +81,76 @@ const Navbar = () => {
           alt="searchIcon"
           className={`h-9 ${isScrolled && "invert opacity-80"}`}
         />
-        <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
-          Login
-        </button>
+        {user && (
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="my booking"
+                labelIcon={
+                  <svg
+                    className="w-4 h-4 text-gray-700"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4"
+                    />
+                  </svg>
+                }
+                onClick={() => navigate("/")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
+        )}
+        {!user && (
+          <button
+            onClick={openSignIn}
+            className="bg-black cursor-pointer text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500"
+          >
+            Login
+          </button>
+        )}
       </div>
 
       {/* Mobile Menu Button */}
       <div className="flex items-center gap-3 md:hidden">
+        {user && (
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="my booking"
+                labelIcon={
+                  <svg
+                    className="w-4 h-4 text-gray-700"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4"
+                    />
+                  </svg>
+                }
+                onClick={() => navigate("/")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
+        )}
         <img
           onClick={() => setIsMenuOpen(true)}
           src={assets.menuIcon}
@@ -116,13 +185,20 @@ const Navbar = () => {
           </NavLink>
         ))}
 
-        <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all">
-          Dashboard
-        </button>
+        {user && (
+          <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all">
+            Dashboard
+          </button>
+        )}
 
-        <button className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500">
-          Login
-        </button>
+        {!user && (
+          <button
+            onClick={openSignIn}
+            className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
+          >
+            Login
+          </button>
+        )}
       </div>
     </nav>
   );
