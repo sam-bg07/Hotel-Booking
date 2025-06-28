@@ -11,18 +11,25 @@ const Home = () => {
   } = useForm();
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    const formData = {
+    const { destination, checkIn, checkOut, guests } = e;
+
+    if (new Date(checkIn) >= new Date(checkOut)) {
+      alert("Check-in date must be before check-out date");
+      return;
+    }
+
+    reset();
+
+    console.log("Search submitted:", {
       destination,
       checkIn,
       checkOut,
       guests,
-    };
-    console.log("Searching hotels with:", formData);
+    });
   };
 
   return (
-    <div className='h-screen flex flex-col md:top-0 justify-center items-start text-white px-6 md:px-16 lg:px-24 xl:px-32 bg-[url("/src/assets/heroImage.png")] bg-no-repeat bg-cover '>
+    <div className='h-screen flex  flex-col md:top-0 justify-center items-start text-white px-6 md:px-16 lg:px-24 xl:px-32 bg-[url("/src/assets/heroImage.png")] bg-no-repeat bg-cover '>
       <p className="bg-[#F0F8FF90] text-black rounded-2xl px-3 py-1 ">
         The Ultimate Hotel Experience
       </p>
@@ -36,7 +43,7 @@ const Home = () => {
 
       <form
         onSubmit={handleSubmit(handleSearch)}
-        className="bg-white text-gray-800 rounded-lg px-6 py-4 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto"
+        className="bg-white text-gray-800 rounded-lg px-6 py-4 mt-10 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto"
       >
         {/* Destination */}
         <div>
