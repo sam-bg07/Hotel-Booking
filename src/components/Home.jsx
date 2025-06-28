@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { assets } from "../assets/assets";
+import { useForm } from "react-hook-form";
 
 const Home = () => {
-  const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(1);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
 
-  const handleSubmit = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
     const formData = {
       destination,
@@ -32,25 +35,28 @@ const Home = () => {
       </p>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(handleSearch)}
         className="bg-white text-gray-800 rounded-lg px-6 py-4 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto"
       >
         {/* Destination */}
         <div>
           <div className="flex items-center gap-2">
             <img src={assets.calenderIcon} alt="" className="h-4" />
-            <label htmlFor="destinationInput">Destination</label>
+            <label htmlFor="destination">Destination</label>
           </div>
           <input
             list="destinations"
-            id="destinationInput"
+            id="destination"
             type="text"
             className="rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
             placeholder="Type here"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            required
+            {...register("destination", {
+              required: "Destination is required",
+            })}
           />
+          {errors.destination && (
+            <p className="text-red-500 text-sm">{errors.destination.message}</p>
+          )}
           <datalist id="destinations">
             <option value="New York" />
             <option value="Los Angeles" />
@@ -70,10 +76,11 @@ const Home = () => {
             id="checkIn"
             type="date"
             className="rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            required
+            {...register("checkIn", { required: "Check-in date is required" })}
           />
+          {errors.checkIn && (
+            <p className="text-red-500 text-sm">{errors.checkIn.message}</p>
+          )}
         </div>
 
         {/* Check-out */}
@@ -86,26 +93,34 @@ const Home = () => {
             id="checkOut"
             type="date"
             className="rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            required
+            {...register("checkOut", {
+              required: "Check-out date is required",
+            })}
           />
+          {errors.checkOut && (
+            <p className="text-red-500 text-sm">{errors.checkOut.message}</p>
+          )}
         </div>
 
         {/* Guests */}
         <div className="flex md:flex-col max-md:gap-2 max-md:items-center">
           <label htmlFor="guests">Guests</label>
           <input
-            min={1}
-            max={4}
             id="guests"
             type="number"
+            min={1}
+            max={4}
             className="rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none max-w-16"
             placeholder="0"
-            value={guests}
-            onChange={(e) => setGuests(e.target.value)}
-            required
+            {...register("guests", {
+              required: "Number of guests is required",
+              min: { value: 1, message: "At least 1 guest required" },
+              max: { value: 4, message: "Max 4 guests allowed" },
+            })}
           />
+          {errors.guests && (
+            <p className="text-red-500 text-sm">{errors.guests.message}</p>
+          )}
         </div>
 
         {/* Search Button */}
