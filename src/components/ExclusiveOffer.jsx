@@ -10,7 +10,7 @@ const ExclusiveOffer = () => {
       <p>
         <span className="text-5xl font-stretch-500%">Exclusive Offers</span>
       </p>
-      <div className="text-gray-600 mt-5 max-md:text-start max-sm:mx-4">
+      <div className="text-gray-600 mt-5 max-sm:mx-4">
         Take advantage of our handpicked deals and seasonal packages created
         just for you.
         <br />
@@ -20,29 +20,20 @@ const ExclusiveOffer = () => {
         Book today and let us take care of the rest.
       </div>
 
-      {/* Offer Cards Section   exclusiveOffers ${
-              hoveredCard && hoveredCard !== offer._id
-                ? "bg-black"
-                : "bg-red-700"
-            }*/}
-      <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4  mt-20 w-full">
+      <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4  mt-20 w-full group ">
         {exclusiveOffers.map((offer, index) => (
           <NavLink
             key={offer._id}
-            to={`to="/exclusive-offer/"${offer._id}`}
+            to={`/exclusive-offer/${offer._id}`}
             onMouseEnter={() => setHoveredCard(offer._id)}
             onMouseLeave={() => setHoveredCard(null)}
             className={` ${
               hoveredCard && hoveredCard !== offer._id
                 ? "opacity-50"
                 : "opacity-100"
-            } max-w-100 flex relative  rounded-md rounded-t-xl hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
+            } max-w-100 flex relative rounded-xl overflow-hidden hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
           >
-            <img
-              src={offer?.image}
-              alt="firstImage"
-              className="rounded-t-xl   "
-            />
+            <img src={offer?.image} alt="firstImage" />
             <div className="absolute inset-0  flex  justify-between items-start flex-col p-4 text-white">
               {/* Discount Badge */}
               <span className="bg-gray-900/80 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full self-start">
@@ -59,14 +50,16 @@ const ExclusiveOffer = () => {
                   Expires {offer.expiryDate}
                 </p>
               </div>
-              <div className="flex gap-1 items-center">
-                <span className="mt-2 inline-block font-semibold ">
-                  View Offer
-                </span>
+              <div className="flex gap-2 items-center justify-center">
+                <span className=" inline-block font-semibold ">View Offer</span>
                 <img
                   src={assets.arrowIcon}
                   alt="arrowIcon"
-                  className="text-white"
+                  className={`${
+                    hoveredCard && hoveredCard !== offer._id
+                      ? "opacity-50"
+                      : "group-hover:translate-x-3"
+                  }  translate-x-0 duration-300`}
                 />
               </div>
             </div>
