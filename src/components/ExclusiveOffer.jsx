@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { exclusiveOffers } from "../assets/assets";
+import { assets, exclusiveOffers } from "../assets/assets";
 import { NavLink } from "react-router-dom";
 
 const ExclusiveOffer = () => {
@@ -28,6 +28,7 @@ const ExclusiveOffer = () => {
       <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4  mt-20 w-full">
         {exclusiveOffers.map((offer, index) => (
           <NavLink
+            key={offer._id}
             to={`to="/exclusive-offer/"${offer._id}`}
             onMouseEnter={() => setHoveredCard(offer._id)}
             onMouseLeave={() => setHoveredCard(null)}
@@ -35,20 +36,40 @@ const ExclusiveOffer = () => {
               hoveredCard && hoveredCard !== offer._id
                 ? "opacity-50"
                 : "opacity-100"
-            } max-w-100 flex relative  rounded-md rounded-t-xl hover:translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
+            } max-w-100 flex relative  rounded-md rounded-t-xl hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
           >
             <img
               src={offer?.image}
               alt="firstImage"
               className="rounded-t-xl   "
             />
-            <p
-              className=" absolute  top-0 left-0 m-2 px-2 py-1 text-yellow-300 bg-black/70
- text-sm rounded"
-            >
-              <span className=" font-semibold text-md">{offer.priceOff}</span>%
-              Off
-            </p>
+            <div className="absolute inset-0  flex  justify-between items-start flex-col p-4 text-white">
+              {/* Discount Badge */}
+              <span className="bg-gray-900/80 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full self-start">
+                <span className="font-bold">{offer.priceOff}%</span> OFF
+              </span>
+
+              {/* Bottom Text (you can customize further) */}
+              <div className="text-start">
+                <h3 className="text-2xl  font-stretch-100%">{offer.title}</h3>
+                <p className="text-md text-gray-100 mt-1">
+                  {offer.description}
+                </p>
+                <p className="text-xs text-sky-300 mt-1.5">
+                  Expires {offer.expiryDate}
+                </p>
+              </div>
+              <div className="flex gap-1 items-center">
+                <span className="mt-2 inline-block font-semibold ">
+                  View Offer
+                </span>
+                <img
+                  src={assets.arrowIcon}
+                  alt="arrowIcon"
+                  className="text-white"
+                />
+              </div>
+            </div>
           </NavLink>
         ))}
       </div>

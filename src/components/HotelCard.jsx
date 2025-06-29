@@ -28,7 +28,7 @@ const HotelCard = ({ room, index }) => {
       onClick={() => window.scrollTo(0, 0)}
       className={`max-w-70 relative ${
         hoveredCard && hoveredCard !== room._id ? "opacity-30" : "opacity-100"
-      } rounded-md rounded-t-xl hover:translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
+      } rounded-md rounded-t-xl hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
     >
       <img src={room?.images[0]} alt="firstImage" className="rounded-t-xl   " />
       <p className=" absolute  top-0 left-0 m-2 px-2 py-1 text-white bg-black/60 text-sm rounded">
