@@ -1,7 +1,8 @@
 import React from "react";
 import Navbar from "./components/Navbar";
-import Home from "./components/Home";
+import Home from "./pages/Home";
 import { Routes, Route } from "react-router-dom";
+import About from "./pages/About";
 
 const App = () => {
   return (
@@ -9,6 +10,7 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </div>
   );
