@@ -6,7 +6,7 @@ const ExclusiveOffer = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
 
   return (
-    <div className="bg-gray-50 mt-36 flex flex-col items-center  text-center py-16">
+    <div className="bg-gray-50 mt-10 flex flex-col items-center  text-center py-16">
       <p>
         <span className="text-5xl font-stretch-500%">Exclusive Offers</span>
       </p>
