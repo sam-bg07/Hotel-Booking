@@ -3,6 +3,7 @@ import Hero from "./Hero";
 import HotelCardFeatured from "./HotelCardFeatured";
 import ExclusiveOffer from "./ExclusiveOffer";
 import GuestCard from "./GuestCard";
+import StayUpdatedSection from "./StayUpdatedSection";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       {/* Add more components as needed */}
       <ExclusiveOffer />
       <GuestCard />
+      <StayUpdatedSection />
     </div>
   );
 };
