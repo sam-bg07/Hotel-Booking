@@ -1,7 +1,8 @@
-import React, { use } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
+import { Menu, Search, SidebarCloseIcon } from "lucide-react";
 
 const Navbar = () => {
   const { openSignIn } = useClerk();
@@ -14,10 +15,10 @@ const Navbar = () => {
     { name: "About", path: "/about" },
   ];
 
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -76,10 +77,19 @@ const Navbar = () => {
 
       {/* Desktop Right */}
       <div className="hidden md:flex items-center gap-4">
-        <img
-          src={assets.searchIcon}
-          alt="searchIcon"
-          className={`h-9 ${isScrolled && "invert opacity-80"}`}
+        <Search
+          onClick={() => {
+            navigate("/");
+            setTimeout(() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }, 100);
+          }}
+          className={`h-9 text-white cursor-pointer ${
+            isScrolled && "invert opacity-80"
+          }`}
         />
         {user && (
           <UserButton>
@@ -151,11 +161,9 @@ const Navbar = () => {
             </UserButton.MenuItems>
           </UserButton>
         )}
-        <img
+        <Menu
           onClick={() => setIsMenuOpen(true)}
-          src={assets.menuIcon}
-          alt="menuIcon"
-          className={`${isScrolled && "invert"} h-4`}
+          className={`${isScrolled && "invert"} text-white h-10`}
         />
       </div>
 
@@ -166,10 +174,10 @@ const Navbar = () => {
         }`}
       >
         <button
-          className="absolute top-4 right-4"
+          className="absolute top-7 right-6"
           onClick={() => setIsMenuOpen(false)}
         >
-          <img src={assets.closeIcon} alt="closeIcon" className="h-6" />
+          <SidebarCloseIcon className="h-6" />
         </button>
 
         {navLinks.map((link, i) => (

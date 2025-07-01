@@ -88,9 +88,10 @@
 // };
 
 import { Hotel, ShieldCheck, MapPin } from "lucide-react";
+import { useMemo } from "react";
 
 export const AboutSection = () => {
-  const features = [
+  const features = useMemo(() => [
     {
       icon: Hotel,
       title: "Premium Stays",
@@ -109,7 +110,7 @@ export const AboutSection = () => {
       description:
         "Strategic locations in the heart of destinations, offering easy access to attractions, dining, and local experiences.",
     },
-  ];
+  ]);
 
   return (
     <section

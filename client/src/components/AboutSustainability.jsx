@@ -105,9 +105,10 @@
 // };
 
 import { Leaf, Recycle, Users2, Building } from "lucide-react";
+import { useMemo } from "react";
 
 export const AboutSustainability = () => {
-  const initiatives = [
+  const initiatives = useMemo(() => [
     {
       icon: Leaf,
       title: "Carbon Neutral Stays",
@@ -132,7 +133,7 @@ export const AboutSustainability = () => {
       description:
         "Prioritizing properties with LEED certification and sustainable construction practices.",
     },
-  ];
+  ]);
 
   return (
     <section className="bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 py-16 px-4 sm:px-6 lg:px-8">

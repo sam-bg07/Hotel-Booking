@@ -79,9 +79,10 @@
 
 import { Calendar, Users, Award, TrendingUp } from "lucide-react";
 import { assets } from "../assets/assets";
+import { useMemo } from "react";
 
 export const AboutOurStory = () => {
-  const milestones = [
+  const milestones = useMemo(() => [
     {
       year: "2018",
       title: "Founded",
@@ -107,7 +108,7 @@ export const AboutOurStory = () => {
       description: "Now serving 100+ destinations across 6 continents",
       icon: TrendingUp,
     },
-  ];
+  ]);
 
   return (
     <section className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-16 px-4 sm:px-6 lg:px-8">
