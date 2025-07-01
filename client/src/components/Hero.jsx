@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { assets } from "../assets/assets";
 import { useForm } from "react-hook-form";
+import {
+  Globe,
+  LogIn,
+  LogOut,
+  Users,
+  SearchIcon,
+  Navigation,
+} from "lucide-react";
 
 const Hero = () => {
   const {
@@ -48,7 +55,7 @@ const Hero = () => {
         {/* Destination */}
         <div>
           <div className="flex items-center gap-2">
-            <img src={assets.calenderIcon} alt="" className="h-4" />
+            <Navigation className="h-5 opacity-80" />
             <label htmlFor="destination">Destination</label>
           </div>
           <input
@@ -76,7 +83,7 @@ const Hero = () => {
         {/* Check-in */}
         <div>
           <div className="flex items-center gap-2">
-            <img src={assets.calenderIcon} alt="" className="h-4" />
+            <LogIn className="h-5 opacity-80" />
             <label htmlFor="checkIn">Check in</label>
           </div>
           <input
@@ -93,7 +100,7 @@ const Hero = () => {
         {/* Check-out */}
         <div>
           <div className="flex items-center gap-2">
-            <img src={assets.calenderIcon} alt="" className="h-4" />
+            <LogOut className="h-5 opacity-80" />
             <label htmlFor="checkOut">Check out</label>
           </div>
           <input
@@ -111,7 +118,10 @@ const Hero = () => {
 
         {/* Guests */}
         <div className="flex md:flex-col max-md:gap-2 max-md:items-center">
-          <label htmlFor="guests">Guests</label>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 opacity-80" />
+            <label htmlFor="guests">Guests</label>
+          </div>
           <input
             id="guests"
             type="number"
@@ -135,7 +145,8 @@ const Hero = () => {
           type="submit"
           className="flex items-center justify-center gap-1 rounded-md bg-black py-3 px-3 text-white my-auto cursor-pointer max-md:w-full max-md:py-1"
         >
-          <img src={assets.searchIcon} alt="searchIcon" className="h-6" />
+          {/* <img src={assets.searchIcon} alt="searchIcon" className="h-6" /> */}
+          <SearchIcon className="h-5" />
           <span>Search</span>
         </button>
       </form>

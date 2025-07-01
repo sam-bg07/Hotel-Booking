@@ -97,9 +97,10 @@
 // };
 
 import { Linkedin, Mail } from "lucide-react";
+import { useMemo } from "react";
 
 export const AboutOurTeam = () => {
-  const teamMembers = [
+  const teamMembers = useMemo(() => [
     {
       name: "Sarah Johnson",
       role: "CEO & Founder",
@@ -132,7 +133,7 @@ export const AboutOurTeam = () => {
       linkedin: "#",
       email: "david@quickstay.com",
     },
-  ];
+  ]);
 
   return (
     <section className="bg-gradient-to-br from-gray-50 to-blue-50 py-16 px-4 sm:px-6 lg:px-8">

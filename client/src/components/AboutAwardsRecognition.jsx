@@ -100,7 +100,16 @@
 //   );
 // };
 
-import { Trophy, Star, Users, ThumbsUp } from "lucide-react";
+import {
+  Trophy,
+  Star,
+  Users,
+  Smile,
+  ThumbsUp,
+  MapPin,
+  Building,
+} from "lucide-react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 
 export const AboutAwardsRecognition = () => {
   const achievements = [
@@ -130,12 +139,98 @@ export const AboutAwardsRecognition = () => {
     },
   ];
 
-  const stats = [
-    { number: "500K+", label: "Happy Travelers" },
-    { number: "10K+", label: "Partner Properties" },
-    { number: "100+", label: "Destinations" },
-    { number: "4.9/5", label: "Average Rating" },
+  const statsData = [
+    {
+      id: 1,
+      icon: Smile,
+      label: "Happy Travelers",
+      value: 0,
+      maxValue: "50000",
+    },
+    {
+      id: 2,
+      icon: Building,
+      label: "Partner Properties",
+      value: 0,
+      maxValue: "10000",
+    },
+    {
+      id: 3,
+      icon: MapPin,
+      label: "Destinations",
+      value: 0,
+      maxValue: "100",
+    },
+    {
+      id: 4,
+      icon: Star,
+      label: "Average Rating",
+      value: 0,
+      maxValue: "4.9",
+    },
   ];
+
+  const memoizedStats = useMemo(() => statsData, []);
+
+  const [stats, setStats] = useState(memoizedStats);
+
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // console.log("entry created", entry);
+        } else {
+          setIsVisible(false);
+          // resetStats(); // Reset stats when out of viewport
+        }
+      },
+      { threshold: 0.5 } // Trigger when 50% of the section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      startAnimation();
+    }
+  }, [isVisible]);
+
+  const startAnimation = () => {
+    const interval = setInterval(() => {
+      setStats((prevStats) => {
+        let allReached = true;
+        const newStats = prevStats.map((stat) => {
+          if (stat.value < stat.maxValue) {
+            allReached = false;
+            return {
+              ...stat,
+              value: Math.min(
+                stat.value + Math.ceil(stat.maxValue / 100),
+                stat.maxValue
+              ),
+            };
+          }
+          return stat;
+        });
+
+        if (allReached) clearInterval(interval);
+        return newStats;
+      });
+    }, 50);
+  };
 
   return (
     <section className="bg-gradient-to-br from-slate-50 to-gray-100 py-16 px-4 sm:px-6 lg:px-8">
@@ -152,15 +247,24 @@ export const AboutAwardsRecognition = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-                {stat.number}
+        <div
+          ref={sectionRef}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16"
+        >
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <div key={index} className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4">
+                  <IconComponent className="w-8 h-8 text-blue-400" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                  {stat.value}+
+                </div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
               </div>
-              <div className="text-gray-600 font-medium">{stat.label}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Awards */}
