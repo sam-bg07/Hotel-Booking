@@ -38,6 +38,7 @@ import uploadArea from "./uploadArea.svg";
 import totalBookingIcon from "./totalBookingIcon.svg";
 import totalRevenueIcon from "./totalRevenueIcon.svg";
 import ourstory from "./ourstory.jpg";
+import newsLetter from "./newsLetterImage.png";
 
 export const assets = {
   logo,
@@ -73,6 +74,7 @@ export const assets = {
   uploadArea,
   totalBookingIcon,
   totalRevenueIcon,
+  newsLetter,
 };
 
 export const cities = ["Dubai", "Singapore", "New York", "London"];
