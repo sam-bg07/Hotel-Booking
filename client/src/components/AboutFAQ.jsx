@@ -87,13 +87,13 @@
 //   );
 // };
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 export const AboutFAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
 
-  const faqs = [
+  const faqs = useMemo(() => [
     {
       question: "When was QuickStay founded?",
       answer:
@@ -124,7 +124,7 @@ export const AboutFAQ = () => {
       answer:
         "We're committed to carbon-neutral stays, partner with eco-certified properties, and invest in local communities to promote responsible tourism.",
     },
-  ];
+  ]);
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);

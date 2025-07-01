@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { assets, exclusiveOffers } from "../assets/assets";
+import { exclusiveOffers } from "../assets/assets";
 import { NavLink } from "react-router-dom";
+import { MoveRightIcon } from "lucide-react";
 
 const ExclusiveOffer = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -52,9 +53,7 @@ const ExclusiveOffer = () => {
               </div>
               <div className="flex gap-2 items-center justify-center">
                 <span className=" inline-block font-semibold ">View Offer</span>
-                <img
-                  src={assets.arrowIcon}
-                  alt="arrowIcon"
+                <MoveRightIcon
                   className={`${
                     hoveredCard && hoveredCard !== offer._id
                       ? "opacity-50"

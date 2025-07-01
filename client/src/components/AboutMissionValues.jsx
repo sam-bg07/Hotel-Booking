@@ -88,9 +88,10 @@
 // };
 
 import { Heart, Globe, Shield, Zap } from "lucide-react";
+import { useMemo } from "react";
 
 export const AboutMissionValues = () => {
-  const values = [
+  const values = useMemo(() => [
     {
       icon: Heart,
       title: "Customer First",
@@ -115,7 +116,7 @@ export const AboutMissionValues = () => {
       description:
         "Continuously improving our platform with cutting-edge technology and user feedback.",
     },
-  ];
+  ]);
 
   return (
     <section className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 px-4 sm:px-6 lg:px-8">
