@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
 import { Menu, Search, SidebarCloseIcon } from "lucide-react";
@@ -7,6 +7,7 @@ import { Menu, Search, SidebarCloseIcon } from "lucide-react";
 const Navbar = () => {
   const { openSignIn } = useClerk();
   const { user } = useUser();
+  const location = useLocation();
   const navigate = useNavigate();
   const navLinks = [
     { name: "Home", path: "/" },
@@ -22,9 +23,16 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
+
+    if (location.pathname === "/") {
+      handleScroll(); // Check scroll immediately
+      window.addEventListener("scroll", handleScroll);
+    } else {
+      setIsScrolled(true); // ✅ Force solid navbar on all other pages
+    }
+
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location]);
 
   return (
     <nav
