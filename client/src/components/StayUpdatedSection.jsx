@@ -3,7 +3,7 @@ import { assets } from "../assets/assets";
 
 const StayUpdatedSection = () => {
   return (
-    <div className="mt-28 mb-14 bg-blue-50 rounded-2xl shadow-xl mx-4 sm:mx-10 md:mx-20">
+    <div className="mt-28 mb-14 bg-blue-50 rounded-2xl shadow-xl mx-4 sm:mx-10 md:mx-30">
       <div className="grid grid-cols-1 md:grid-cols-2 py-10 max-md:gap-y-14 px-4 sm:px-8">
         <img
           src={assets.newsLetter}
