@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import About from "./pages/About";
 import Footer from "./components/Footer";
 import Hotel from "./pages/Hotel";
+import RoomDetails from "./pages/RoomDetails";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/hotels" element={<Hotel />} />
+        <Route path="/hotels/:id" element={<RoomDetails />} />
       </Routes>
       <Footer />
     </div>
