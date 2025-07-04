@@ -22,7 +22,7 @@ const HotelCard = ({ room, index }) => {
     //     "__v": 0
     // }
     <NavLink
-      to="/rooms"
+      to={`/hotels/${room._id}`}
       onMouseEnter={() => setHoveredCard(room._id)}
       onMouseLeave={() => setHoveredCard(null)}
       onClick={() => window.scrollTo(0, 0)}
