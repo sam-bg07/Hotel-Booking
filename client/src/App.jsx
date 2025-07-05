@@ -7,20 +7,27 @@ import Footer from "./components/Footer";
 import Hotel from "./pages/Hotel";
 import RoomDetails from "./pages/RoomDetails";
 import MyBooking from "./pages/MyBooking";
+import HotelRegister from "./components/HotelRegister";
+import Layout from "./pages/HotelOwner/Layout";
+import { useLocation } from "react-router-dom";
 
 const App = () => {
+  const location = useLocation();
+  const isOwnerRoute = location.pathname.includes("/owner");
   return (
     <div>
-      <Navbar />
+      {!isOwnerRoute && <Navbar />}
+      {false && <HotelRegister />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/hotels" element={<Hotel />} />
         <Route path="/hotels/:id" element={<RoomDetails />} />
         <Route path="/my-booking" element={<MyBooking />} />
+        <Route path="/owner" element={<Layout />}></Route>
         {/* Add more routes as needed */}
       </Routes>
-      <Footer />
+      {!isOwnerRoute && <Footer />}
     </div>
   );
 };
