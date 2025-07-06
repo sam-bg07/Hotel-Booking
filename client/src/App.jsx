@@ -6,6 +6,11 @@ import About from "./pages/About";
 import Footer from "./components/Footer";
 import Hotel from "./pages/Hotel";
 import RoomDetails from "./pages/RoomDetails";
+import MyBooking from "./pages/MyBooking";
+import HotelRegister from "./components/HotelRegister";
+import Layout from "./pages/HotelOwner/Layout";
+import { useLocation } from "react-router-dom";
+import Experience from "./pages/Experience";
 
 const App = () => {
   const location = useLocation();
@@ -19,6 +24,10 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/hotels" element={<Hotel />} />
         <Route path="/hotels/:id" element={<RoomDetails />} />
+        <Route path="/experience" element={<Experience />} />
+        <Route path="/my-booking" element={<MyBooking />} />
+        <Route path="/owner" element={<Layout />} />
+        {/* Add more routes as needed */}
       </Routes>
       {!isOwnerRoute && <Footer />}
     </div>
