@@ -10,10 +10,10 @@ import {
 } from "lucide-react";
 
 const sidebarLinks = [
-  { name: "Dashboard", path: "/owner/a", icon: LayoutDashboard },
+  { name: "Dashboard", path: "/owner/", icon: LayoutDashboard },
   { name: "Add Room", path: "/owner/add-room", icon: PlusSquare },
   { name: "List Room", path: "/owner/list-room", icon: ListOrdered },
-  { name: "Profile", path: "/owner", icon: User },
+  { name: "Profile", path: "/owner/profile", icon: User },
 ];
 
 const Sidebar = () => {
