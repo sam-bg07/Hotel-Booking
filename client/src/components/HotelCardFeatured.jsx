@@ -30,7 +30,7 @@ const HotelCardFeatured = () => {
       <div>
         <button
           onClick={() => {
-            Navigate("/rooms");
+            Navigate("/hotels");
           }}
           className="bg-black text-white px-5 py-2.5 mt-15 cursor-pointer rounded-md  hover:bg-gray-800 transition-colors"
         >
