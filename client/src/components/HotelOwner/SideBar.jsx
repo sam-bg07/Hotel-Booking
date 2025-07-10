@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 const sidebarLinks = [
-  { name: "Dashboard", path: "/owner/", icon: LayoutDashboard },
+  { name: "Dashboard", path: "/owner", icon: LayoutDashboard },
   { name: "Add Room", path: "/owner/add-room", icon: PlusSquare },
   { name: "List Room", path: "/owner/list-room", icon: ListOrdered },
   { name: "Profile", path: "/owner/profile", icon: User },
@@ -81,6 +81,7 @@ const Sidebar = () => {
             <NavLink
               key={link.name}
               to={link.path}
+              end
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                   isActive
