@@ -51,8 +51,8 @@ const Dashboard = () => {
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking._id} className="border-t hover:bg-gray-50">
-                <td className="px-6 py-4">{booking.user.name}</td>
-                <td className="px-6 py-4">{booking.room.title}</td>
+                <td className="px-6 py-4">{booking.user.username}</td>
+                <td className="px-6 py-4">{booking.room.roomType}</td>
                 <td className="px-6 py-4">${booking.totalPrice}</td>
                 <td className="px-6 py-4">
                   {booking.isPaid ? (
@@ -97,7 +97,7 @@ const Dashboard = () => {
             <div className="text-sm text-gray-600 space-y-1">
               <p>
                 <span className="font-medium text-gray-500">User:</span>{" "}
-                {booking.room.hotel.owner.username}
+                {booking.user.username}
               </p>
               <p>
                 <span className="font-medium text-gray-500">Amount:</span> $

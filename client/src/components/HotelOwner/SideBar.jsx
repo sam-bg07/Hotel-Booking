@@ -58,6 +58,7 @@ const Sidebar = () => {
             <NavLink
               key={link.name}
               to={link.path}
+              end
               onClick={() => setIsOpen(false)} // Close after click
               className={({ isActive }) =>
                 `flex items-center gap-3 px-5 py-2 rounded-lg text-lg font-medium transition-all duration-200 ${
