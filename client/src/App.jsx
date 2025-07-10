@@ -12,6 +12,7 @@ import Layout from "./pages/HotelOwner/Layout";
 import { useLocation } from "react-router-dom";
 import Experience from "./pages/Experience";
 import Dashboard from "./pages/HotelOwner/Dashboard";
+import AddRoom from "./pages/HotelOwner/AddRoom";
 
 const App = () => {
   const location = useLocation();
@@ -29,7 +30,7 @@ const App = () => {
         <Route path="/my-booking" element={<MyBooking />} />
         <Route path="/owner" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="add-room" element={<h1>Add Room</h1>} />
+          <Route path="add-room" element={<AddRoom />} />
           <Route path="list-room" element={<h1>List Room</h1>} />
           {/* Add more owner routes as needed */}
         </Route>
