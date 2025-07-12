@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
 // Define the webhook route
-app.use("/webhooks/clerk", clerkWebhookSecret);
+app.use("/api/clerk", clerkWebhookSecret);
 
 connectDB();
 
