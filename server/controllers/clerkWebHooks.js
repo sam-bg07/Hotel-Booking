@@ -1,44 +1,63 @@
 const User = require("../models/User");
 const { Webhook } = require("svix");
+const dotenv = require("dotenv");
+dotenv.config();
 
-const clerkWebhookSecret = async () => {
+const clerkWebhookSecret = async (req, res) => {
   try {
     const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-    // Assuming you want to return the webhook secret for further use
-    const headers = {
-      "svix-id": req.headers["svix-id"], // Replace with your actual webhook ID
-      "svix-timestamp": req.headers["svix-timestamp"], // Replace with your actual webhook timestamp
-      "svix-signature": req.headers["svix-signature"], // Replace with your actual webhook signature
-    };
-    await webhook.verify(JSON.stringify(req.body), headers);
 
-    const { data, type } = req.body;
-    const user = new User({
-      _id: data.id,
-      email: data.email_addresses[0].email_address,
-      username: data.username,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      image: data.image_url,
-      roles: data.roles && data.roles.includes("admin") ? "admin" : "user",
-    });
+    const headers = {
+      "svix-id": req.headers["svix-id"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+      "svix-signature": req.headers["svix-signature"],
+    };
+
+    const payload = webhook.verify(JSON.stringify(req.body), headers);
+
+    const { data, type } = payload;
+
+    console.log("Webhook event received:", type);
 
     if (type === "user.created") {
-      // Create a new user in your database
+      const user = new User({
+        _id: data.id,
+        email: data.email_addresses?.[0]?.email_address || "",
+        username: data.username || "",
+        firstName: data.first_name || "",
+        lastName: data.last_name || "",
+        image: data.image_url || "",
+        roles: data.roles?.includes("admin") ? "admin" : "user",
+      });
+
       await user.save();
+      console.log("User created:", user);
     } else if (type === "user.updated") {
-      // Update an existing user in your database
-      await User.findByIdAndUpdate(data.id, userData, { new: true });
+      await User.findByIdAndUpdate(
+        data.id,
+        {
+          email: data.email_addresses?.[0]?.email_address || "",
+          username: data.username || "",
+          firstName: data.first_name || "",
+          lastName: data.last_name || "",
+          image: data.image_url || "",
+          roles: data.roles?.includes("admin") ? "admin" : "user",
+        },
+        { new: true }
+      );
+      console.log("User updated:", data.id);
     } else if (type === "user.deleted") {
-      // Delete the user from your database
       await User.findByIdAndDelete(data.id);
+      console.log("User deleted:", data.id);
     }
-    res.JSON({ message: "Webhook processed successfully", status: "success" });
+
+    res.status(200).json({ message: "Webhook processed successfully" });
   } catch (error) {
-    console.error("Error fetching Clerk webhook secret:", error);
-    res
-      .status(500)
-      .json({ message: "Error processing webhook", error: error.message });
+    console.error("Error processing Clerk webhook:", error.message);
+    res.status(500).json({
+      message: "Error processing webhook",
+      error: error.message,
+    });
   }
 };
 
