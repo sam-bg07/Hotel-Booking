@@ -25,3 +25,5 @@ dist-ssr
 
 # Dependency Directories
 node_modules/
+
+.env
