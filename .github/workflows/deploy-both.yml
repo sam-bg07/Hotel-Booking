@@ -1,0 +1,30 @@
+name: Deploy Both Backends
+
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install -g vercel@latest
+
+      - name: Deploy Friend Backend
+        env:
+          VERCEL_TOKEN: ${{ secrets.FRIEND_VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.FRIEND_VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.FRIEND_VERCEL_PROJECT_ID }}
+        run: |
+          vercel pull --yes --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy My Backend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel pull --yes --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
