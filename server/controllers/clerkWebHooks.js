@@ -13,7 +13,7 @@ const clerkWebhookSecret = async (req, res) => {
       "svix-signature": req.headers["svix-signature"],
     };
 
-    const payload = webhook.verify(JSON.stringify(req.body), headers);
+    const payload = await webhook.verify(JSON.stringify(req.body), headers);
 
     const { data, type } = payload;
 
