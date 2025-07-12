@@ -1,9 +1,9 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const { clerkMiddleware } = require("@clerk/express");
-const clerkWebhookSecret = require("./controllers/clerkWebHooks");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
+import { clerkMiddleware } from "@clerk/express";
+import { clerkWebhookSecret } from "./controllers/clerkWebHooks.js";
 
 dotenv.config(); // Load .env variables
 
@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://hotel-booking-backend-seven-ruddy.vercel.app/",
+  // "https://hotel-booking-backend-seven-ruddy.vercel.app/",
 ];
 app.use(
   cors({
