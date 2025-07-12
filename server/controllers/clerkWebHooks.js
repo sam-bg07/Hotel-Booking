@@ -13,14 +13,15 @@ const clerkWebhookSecret = async () => {
     await webhook.verify(JSON.stringify(req.body), headers);
 
     const { data, type } = req.body;
-    const userData = {
+    const user = new User({
       _id: data.id,
-      username: data.username,
       email: data.email_addresses[0].email_address,
-      image: data.profile_image_url,
-    };
-
-    const user = new User(userData);
+      username: data.username,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      image: data.image_url,
+      roles: data.roles && data.roles.includes("admin") ? "admin" : "user",
+    });
 
     if (type === "user.created") {
       // Create a new user in your database
