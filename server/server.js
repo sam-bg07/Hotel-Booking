@@ -10,7 +10,21 @@ dotenv.config(); // Load .env variables
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://hotel-booking-backend-seven-ruddy.vercel.app/",
+];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(clerkMiddleware());
 // Define the webhook route
