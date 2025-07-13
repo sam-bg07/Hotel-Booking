@@ -10,10 +10,7 @@ dotenv.config(); // Load .env variables
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  // "https://hotel-booking-backend-seven-ruddy.vercel.app/",
-];
+const allowedOrigins = ["http://localhost:5173"];
 app.use(
   cors({
     origin: (origin, callback) => {
