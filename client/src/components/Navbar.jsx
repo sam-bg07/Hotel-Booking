@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
-import { useClerk, useUser, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
+import { useClerk, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
 import { Menu, Search, SidebarCloseIcon } from "lucide-react";
+import { UseAppContext } from "../context/AppContext.jsx";
+
+import { set } from "react-hook-form";
 
 const Navbar = () => {
+  // const { user, navigate, isOwner, setShowHotelReg } = UseAppContext();
+  const context = UseAppContext();
+  console.log("App Context:", context);
+
+  if (!context) return <p>Context not found</p>;
+
+  const { user, navigate, isOwner, setShowHotelReg } = context;
   const { openSignIn } = useClerk();
-  const { user } = useUser();
   const location = useLocation();
-  const navigate = useNavigate();
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Hotels", path: "/hotels" },
@@ -77,8 +85,11 @@ const Navbar = () => {
             className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
               isScrolled ? "text-black" : "text-white"
             } transition-all`}
+            onClick={() => {
+              isOwner ? navigate("/owner") : setShowHotelReg(true);
+            }}
           >
-            Dashboard
+            {isOwner ? "Dashboard" : "My Booking"}
           </button>
         )}
       </div>
@@ -202,8 +213,13 @@ const Navbar = () => {
         ))}
 
         {user && (
-          <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all">
-            Dashboard
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
+            onClick={() => {
+              isOwner ? navigate("/owner") : setShowHotelReg(true);
+            }}
+          >
+            {isOwner ? "Dashboard" : "My Booking"}
           </button>
         )}
 

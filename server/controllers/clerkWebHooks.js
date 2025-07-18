@@ -1,6 +1,7 @@
-const User = require("../models/User");
-const { Webhook } = require("svix");
-const dotenv = require("dotenv");
+import User from "../models/User.js";
+
+import { Webhook } from "svix";
+import dotenv from "dotenv";
 dotenv.config();
 
 const clerkWebhookSecret = async (req, res) => {
@@ -61,4 +62,4 @@ const clerkWebhookSecret = async (req, res) => {
   }
 };
 
-module.exports = clerkWebhookSecret;
+export default clerkWebhookSecret;
