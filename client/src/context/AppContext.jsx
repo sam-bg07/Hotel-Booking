@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  use,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { toast } from "react-hot-toast";
@@ -12,24 +18,27 @@ export const AppProvider = ({ children }) => {
   const { user } = useUser();
   const { getToken } = useAuth();
 
-  const [isOwner, setIsOwner] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isOwner, setIsOwner] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [showHotelReg, setShowHotelReg] = useState(false);
+
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get("/api/user", {
+      const token = await getToken();
+      if (!token) {
+        toast.error("You are not logged in");
+        setIsLoadingUser(false);
+        return;
+      }
+      const { data } = await axios.get(`${API_BASE}/api/user`, {
         headers: {
-          Authorization: `Bearer ${await getToken()}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (data.success) {
-        setIsLoggedIn(true);
-        if (data.role === "hotelOwner") {
-          setIsOwner(true);
-        } else {
-          setIsOwner(false);
-        }
+        setIsOwner(data.roles === "hotelOwner");
       } else {
         setTimeout(() => {
           fetchUser();
@@ -37,6 +46,8 @@ export const AppProvider = ({ children }) => {
       }
     } catch (error) {
       toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsLoadingUser(false); // ALWAYS set loading to false
     }
   };
 
@@ -44,10 +55,11 @@ export const AppProvider = ({ children }) => {
     if (user) {
       fetchUser();
     } else {
-      setIsLoggedIn(false);
       setIsOwner(false);
+      setIsLoadingUser(false); // Set loading to false if no user
     }
   }, [user]);
+
   const value = {
     currency,
     navigate,
@@ -55,10 +67,9 @@ export const AppProvider = ({ children }) => {
     getToken,
     isOwner,
     setIsOwner,
-    isLoggedIn,
-    setIsLoggedIn,
     showHotelReg,
     setShowHotelReg,
+    isLoadingUser,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

@@ -1,3 +1,5 @@
+// components/HotelRegister.jsx
+
 import React, { useState } from "react";
 import { assets } from "../assets/assets";
 import heroImage from "../assets/heroImage.png";
@@ -7,23 +9,35 @@ import axios from "axios";
 
 const HotelRegister = () => {
   const { setShowHotelReg, setIsOwner, getToken } = UseAppContext();
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [hotelName, setHotelName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
+
   const onSubmitHandler = async (event) => {
+    event.preventDefault();
     try {
-      event.preventDefault();
       const token = await getToken();
+      console.log("Token:", token);
+
       if (!token) {
         toast.error("You are not logged in");
         return;
       }
-      console.log(token);
+
+      console.log("Sending request to:", `${API_BASE}/api/hotels`);
+      console.log("Request payload:", {
+        hotelName,
+        phoneNumber,
+        address,
+        city,
+      });
+
       const { data } = await axios.post(
-        "/api/hotels",
-        { name, phone, address, city },
+        `${API_BASE}/api/hotels`,
+        { hotelName, phoneNumber, address, city },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -31,27 +45,27 @@ const HotelRegister = () => {
         }
       );
 
+      console.log("Response received:", data);
+
       if (data.success) {
-        console.log("Data is the : ", data);
         toast.success("Hotel Registered Successfully");
         setShowHotelReg(false);
-
         setIsOwner(true);
       } else {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      toast.error(error.message);
-      return;
+      console.error("Error in hotel registration:", error);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
+
   return (
     <div
       className="fixed top-0 bottom-0 left-0 right-0 z-200 bg-black/70 flex justify-center items-center"
       onClick={() => setShowHotelReg(false)}
     >
       <form
-        action=""
         onSubmit={onSubmitHandler}
         className="bg-white rounded-xl flex max-w-4xl"
         onClick={(e) => e.stopPropagation()}
@@ -85,23 +99,23 @@ const HotelRegister = () => {
               id="hotelName"
               placeholder="Type your hotel name here"
               className="border border-gray-300 rounded-md p-2 w-full mt-1"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={hotelName}
+              onChange={(e) => setHotelName(e.target.value)}
             />
           </div>
 
           {/* Phone Number */}
           <div className="mt-4">
-            <label htmlFor="PhoneNumber" className="text-gray-700 font-medium">
+            <label htmlFor="phoneNumber" className="text-gray-700 font-medium">
               Phone Number
             </label>
             <input
               type="text"
-              id="PhoneNumber"
+              id="phoneNumber"
               placeholder="Add Your Phone Number"
               className="border border-gray-300 rounded-md p-2 w-full mt-1"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </div>
 
@@ -133,10 +147,10 @@ const HotelRegister = () => {
               onChange={(e) => setCity(e.target.value)}
             >
               <option value="">Select City</option>
-              <option value="city1">Surat</option>
-              <option value="city2">City 2</option>
-              <option value="city3">City 3</option>
-              <option value="city4">City 4</option>
+              <option value="Surat">Surat</option>
+              <option value="Ahmedabad">Ahmedabad</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Delhi">Delhi</option>
             </select>
           </div>
 

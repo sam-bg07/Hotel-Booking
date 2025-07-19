@@ -6,6 +6,7 @@ import { Menu, Search, SidebarCloseIcon } from "lucide-react";
 import { UseAppContext } from "../context/AppContext.jsx";
 
 import { set } from "react-hook-form";
+import Loader from "./Loader.jsx";
 
 const Navbar = () => {
   // const { user, navigate, isOwner, setShowHotelReg } = UseAppContext();
@@ -14,7 +15,7 @@ const Navbar = () => {
 
   if (!context) return <p>Context not found</p>;
 
-  const { user, navigate, isOwner, setShowHotelReg } = context;
+  const { user, navigate, isOwner, setShowHotelReg, isLoadingUser } = context;
   const { openSignIn } = useClerk();
   const location = useLocation();
   const navLinks = [
@@ -41,6 +42,8 @@ const Navbar = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [location]);
+
+  if (isLoadingUser) return <Loader />;
 
   return (
     <nav
@@ -80,7 +83,7 @@ const Navbar = () => {
             />
           </NavLink>
         ))}
-        {user && (
+        {user && isOwner !== null && (
           <button
             className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
               isScrolled ? "text-black" : "text-white"
