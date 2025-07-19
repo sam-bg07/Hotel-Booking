@@ -21,7 +21,7 @@ export const hotelController = async (req, res) => {
     });
 
     await User.findByIdAndUpdate(owner, {
-      $set: { role: "hotelOwner" },
+      $set: { roles: "hotelOwner" },
     });
     res.json({ message: "Hotel Registered successfully", success: true });
   } catch (error) {
