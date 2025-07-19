@@ -14,7 +14,7 @@ import Experience from "./pages/Experience";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
-import Toaster from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { UseAppContext } from "./context/AppContext";
 const App = () => {
   const location = useLocation();
