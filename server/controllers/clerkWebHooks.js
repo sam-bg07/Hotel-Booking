@@ -1,5 +1,8 @@
 import User from "../models/User.js";
+
 import { Webhook } from "svix";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const clerkWebhookSecret = async (req, res) => {
   try {
@@ -58,3 +61,5 @@ export const clerkWebhookSecret = async (req, res) => {
     });
   }
 };
+
+export default clerkWebhookSecret;

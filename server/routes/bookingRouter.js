@@ -1,0 +1,18 @@
+import express from "express";
+import { authMiddle } from "../middleware/authMiddleware.js";
+import {
+  checkAvailabilityAPI,
+  createBooking,
+  getAllBookingsByUser,
+  getAllBookingsByHotel,
+} from "../controllers/bookingController.js";
+
+const bookingRouter = express.Router();
+
+// Middleware to check if the user is authenticated
+bookingRouter.post("/check-availability", authMiddle, checkAvailabilityAPI);
+bookingRouter.post("/create-booking", authMiddle, createBooking);
+bookingRouter.get("/user", authMiddle, getAllBookingsByUser);
+bookingRouter.get("/hotel", authMiddle, getAllBookingsByHotel);
+
+export default bookingRouter;

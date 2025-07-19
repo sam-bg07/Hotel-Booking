@@ -1,9 +1,14 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./config/db.js";
+import connectDB from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
-import { clerkWebhookSecret } from "./controllers/clerkWebHooks.js";
+import clerkWebhookSecret from "./controllers/clerkWebHooks.js";
+import userRouter from "./routes/userRouter.js";
+import hotelRouter from "./routes/hotelRouter.js";
+import roomRouter from "./routes/roomRouter.js";
+import bookingRouter from "./routes/bookingRouter.js";
+import { connectCloudinary } from "./config/cloudinary.js";
 
 dotenv.config(); // Load .env variables
 
@@ -28,10 +33,15 @@ app.use(clerkMiddleware());
 app.post("/api/clerk", clerkWebhookSecret);
 
 connectDB();
+connectCloudinary();
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Hotel Booking API after Connecting to MongoDB!");
 });
+app.use("/api/user", userRouter);
+app.use("/api/hotels", hotelRouter);
+app.use("/api/rooms", roomRouter);
+app.use("/api/bookings", bookingRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
