@@ -14,8 +14,9 @@ import Experience from "./pages/Experience";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
-import { Toaster } from "react-hot-toast";
 import { UseAppContext } from "./context/AppContext";
+import { Toaster } from "react-hot-toast";
+import Loader from "./components/Loader";
 const App = () => {
   const location = useLocation();
   const isOwnerRoute = location.pathname.includes("/owner");
@@ -30,8 +31,10 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/hotels" element={<Hotel />} />
         <Route path="/hotels/:id" element={<RoomDetails />} />
-        {/* <Route path="/experience" element={<Experience />} /> */}
+        <Route path="/experience" element={<Experience />} />
         <Route path="/my-booking" element={<MyBooking />} />
+        <Route path="/loader/:nextUrl" element={<Loader />} />
+
         <Route path="/owner/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="add-room" element={<AddRoom />} />

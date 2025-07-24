@@ -1,9 +1,31 @@
 import { useState } from "react";
-import { roomsDummyData } from "../../assets/assets";
+import { UseAppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useEffect } from "react";
 
 const ListRoom = () => {
-  const [rooms, setRooms] = useState(roomsDummyData);
+  const [rooms, setRooms] = useState([]);
+  const { getToken, user } = UseAppContext();
 
+  const fetchRooms = async () => {
+    try {
+      const { data } = await axios.get("/api/rooms/hotel", {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+        },
+      });
+      const { rooms } = data.rooms;
+
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   // const toggleRoomStatus = (id) => {
   //   setRooms(
   //     rooms.map((room) =>
@@ -12,6 +34,34 @@ const ListRoom = () => {
   //   );
   // };
 
+  const toggleRoomStatus = async (roomId) => {
+    try {
+      const { data } = await axios.post(
+        `/api/rooms/toggle-availability/${roomId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${await getToken()}`,
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success("Room availability toggled successfully");
+        fetchRooms(); // Refresh the room list after toggling
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRooms();
+    }
+  }, [user]);
   return (
     <div className="w-full  mt-20 px-6 md:px-12 lg:px-20 py-10 z-30 max-md:mt-30">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List of Rooms</h1>
@@ -48,14 +98,15 @@ const ListRoom = () => {
                     {item.roomType}
                   </td>
                   <td className="py-3 px-4 text-gray-700 border-t border-gray-300 max-sm:hidden">
-                    {item.amenities.join(", ")}
+                    {item.facilities.join(",")}
                   </td>
                   <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
-                    {item.pricePerNight}
+                    {item.price}
                   </td>
                   <td className="py-3 px-4 text-red-500 text-sm text-center border-t border-gray-300">
                     <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
                       <input
+                        onChange={() => toggleRoomStatus(item._id)}
                         type="checkbox"
                         className="sr-only peer"
                         checked={item.isAvailable}
@@ -121,7 +172,7 @@ const ListRoom = () => {
               <div className="space-y-3">
                 <p className="text-sm font-medium text-gray-700">Facilities:</p>
                 <div className="flex flex-wrap gap-2">
-                  {room.amenities.map((facility, index) => (
+                  {room.facilities.map((facility, index) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"

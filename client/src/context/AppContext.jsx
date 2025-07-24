@@ -21,8 +21,31 @@ export const AppProvider = ({ children }) => {
   const [isOwner, setIsOwner] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [showHotelReg, setShowHotelReg] = useState(false);
+  const [rooms, setRooms] = useState([]);
 
   const API_BASE = import.meta.env.VITE_BACKEND_URL;
+
+  const fetchRooms = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("You are not logged in");
+        return;
+      }
+      const { data } = await axios.get(`${API_BASE}/api/rooms`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        toast.error("Failed to fetch rooms");
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
 
   const fetchUser = async () => {
     try {
@@ -60,6 +83,10 @@ export const AppProvider = ({ children }) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
   const value = {
     currency,
     navigate,
@@ -70,6 +97,8 @@ export const AppProvider = ({ children }) => {
     showHotelReg,
     setShowHotelReg,
     isLoadingUser,
+    rooms,
+    setRooms,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

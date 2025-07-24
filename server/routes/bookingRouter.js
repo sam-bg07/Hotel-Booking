@@ -5,6 +5,7 @@ import {
   createBooking,
   getAllBookingsByUser,
   getAllBookingsByHotel,
+  stripePayment,
 } from "../controllers/bookingController.js";
 
 const bookingRouter = express.Router();
@@ -14,5 +15,7 @@ bookingRouter.post("/check-availability", authMiddle, checkAvailabilityAPI);
 bookingRouter.post("/create-booking", authMiddle, createBooking);
 bookingRouter.get("/user", authMiddle, getAllBookingsByUser);
 bookingRouter.get("/hotel", authMiddle, getAllBookingsByHotel);
+
+bookingRouter.post("/stripe-payment", authMiddle, stripePayment);
 
 export default bookingRouter;

@@ -3,17 +3,17 @@ import mongoose from "mongoose";
 const BookingSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },
     hotel: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Hotel",
       required: true,
     },
     room: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Room",
       required: true,
     },
@@ -40,7 +40,7 @@ const BookingSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      default: "Cash",
+      default: "Cash (At Hotel)",
       required: true,
     },
     isPaid: {

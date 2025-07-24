@@ -1,6 +1,10 @@
-import { useState, useMemo } from "react";
-import { roomsDummyData } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { UseAppContext } from "../context/AppContext";
+import { useLocation } from "react-router-dom";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import Loader from "../components/Loader";
+
 import {
   Star,
   MapPin,
@@ -11,7 +15,39 @@ import {
   Waves,
 } from "lucide-react";
 
+const useQuery = () => new URLSearchParams(useLocation().search);
+
 const Hotel = () => {
+  const { currency, navigate, rooms, getToken } = UseAppContext();
+
+  const [room, setRoom] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const query = useQuery();
+  const destination = query.get("destination");
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      let res;
+      if (destination) {
+        // Search: Get filtered hotels/rooms by destination
+        res = await axios.get(`/api/hotels?destination=${destination}`, {
+          headers: {
+            Authorization: `Bearer ${await getToken()}`,
+          },
+        });
+        setRoom(res.data.rooms || []); // assuming response has "hotels"
+      } else {
+        setRoom(rooms); // Use rooms from context if no destination
+      }
+    } catch (err) {
+      console.error("Error fetching data:", err.message);
+    } finally {
+      setIsLoading(false); // Set loading to false after fetching
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [destination, rooms]);
   const amenitiesIcons = {
     "Free WiFi": <Wifi className="w-4 h-4 " />,
     "Room Service": <Utensils className="w-4 h-4 " />,
@@ -71,7 +107,7 @@ const Hotel = () => {
   };
 
   const filteredAndSortedRooms = useMemo(() => {
-    let filtered = roomsDummyData;
+    let filtered = room;
 
     // Filter by room type
     if (selectedRoomTypes.length > 0) {
@@ -83,9 +119,7 @@ const Hotel = () => {
     // Filter by price range
     if (selectedPriceRanges.length > 0) {
       filtered = filtered.filter((room) =>
-        selectedPriceRanges.some((range) =>
-          isPriceInRange(room.pricePerNight, range)
-        )
+        selectedPriceRanges.some((range) => isPriceInRange(room.price, range))
       );
     }
 
@@ -94,9 +128,9 @@ const Hotel = () => {
       filtered = [...filtered].sort((a, b) => {
         switch (sortBy) {
           case "Price Low to High":
-            return a.pricePerNight - b.pricePerNight;
+            return a.price - b.price;
           case "Price High to Low":
-            return b.pricePerNight - a.pricePerNight;
+            return b.price - a.price;
           case "Newest First":
             return new Date(b.createdAt) - new Date(a.createdAt);
           default:
@@ -106,14 +140,15 @@ const Hotel = () => {
     }
 
     return filtered;
-  }, [selectedRoomTypes, selectedPriceRanges, sortBy]);
+  }, [room, selectedRoomTypes, selectedPriceRanges, sortBy]);
 
-  const navigate = useNavigate();
   const [clickShow, setClickShow] = useState(false);
 
   const handleClickShow = () => {
     setClickShow(!clickShow);
   };
+
+  if (isLoading) return <Loader />;
 
   return (
     <div className="mt-40 px-6 md:px-16 lg:px-20 xl:px-28 flex  max-lg:flex-col-reverse ">
@@ -128,8 +163,7 @@ const Hotel = () => {
           </p>
           {/* Results count */}
           <p className="text-sm text-gray-500 mt-2 max-sm:mx-4">
-            Showing {filteredAndSortedRooms.length} of {roomsDummyData.length}{" "}
-            rooms
+            Showing {filteredAndSortedRooms.length} of {room.length} rooms
           </p>
         </div>
 
@@ -155,7 +189,7 @@ const Hotel = () => {
                 {/* Image */}
                 <img
                   onClick={() => navigate(`/hotels/${room._id}`)}
-                  src={room.images[0]}
+                  src={room.images[2]}
                   alt="hotel-image"
                   className="w-full md:w-[50%] h-65 rounded-xl object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                 />
@@ -195,7 +229,7 @@ const Hotel = () => {
                   </div>
                   {/* Amenities */}
                   <div className="flex gap-2 flex-wrap mb-3">
-                    {room.amenities.map((amenity, index) => (
+                    {room.facilities.map((amenity, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm shadow-sm"
@@ -210,7 +244,7 @@ const Hotel = () => {
                   {/* Price */}
                   <p className="text-gray-700 text-sm">
                     <span className="text-lg font-semibold text-black">
-                      ${room.pricePerNight}
+                      ${room.price}
                     </span>{" "}
                     /night
                   </p>

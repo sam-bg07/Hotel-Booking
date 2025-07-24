@@ -1,10 +1,40 @@
-import React from "react";
-import { dashboardDummyData } from "../../assets/assets";
+import React, { useEffect, useState } from "react";
 import { CalendarCheck, DollarSign, CreditCard } from "lucide-react";
+import axios from "axios";
+import { UseAppContext } from "../../context/AppContext.jsx";
+import { toast } from "react-hot-toast";
 
 const Dashboard = () => {
-  const { totalBookings, totalRevenue, bookings } = dashboardDummyData;
+  const { currency, getToken, user } = UseAppContext();
+  const [totalBookings, setTotalBookings] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [bookings, setBookings] = useState([]);
 
+  // Fetch data from the server
+  const fetchDashboardData = async () => {
+    try {
+      const { data } = await axios.get("/api/bookings/hotel", {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+        },
+      });
+      if (data.success) {
+        setTotalBookings(data.dashboardData.totalBookings);
+        setTotalRevenue(data.dashboardData.totalRevenue);
+        setBookings(data.dashboardData.bookings);
+      } else {
+        toast.error(data.message || "Failed to fetch dashboard data");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
   return (
     <div className="w-full  mt-20 px-6 md:px-12 lg:px-20 py-10 z-30 max-md:mt-30">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
@@ -27,7 +57,9 @@ const Dashboard = () => {
           <DollarSign className="w-8 h-8 text-green-500" />
           <div>
             <p className="text-sm text-gray-500">Total Revenue</p>
-            <h2 className="text-xl font-bold">${totalRevenue}</h2>
+            <h2 className="text-xl font-bold">
+              {currency} {totalRevenue}
+            </h2>
           </div>
         </div>
       </div>
@@ -53,7 +85,10 @@ const Dashboard = () => {
               <tr key={booking._id} className="border-t hover:bg-gray-50">
                 <td className="px-6 py-4">{booking.user.username}</td>
                 <td className="px-6 py-4">{booking.room.roomType}</td>
-                <td className="px-6 py-4">${booking.totalPrice}</td>
+                <td className="px-6 py-4">
+                  {currency}
+                  {booking.totalPrice}
+                </td>
                 <td className="px-6 py-4">
                   {booking.isPaid ? (
                     <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-medium">

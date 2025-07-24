@@ -7,19 +7,29 @@ import { v2 as cloudinary } from "cloudinary";
 export const createRoom = async (req, res) => {
   try {
     const { roomType, price, facilities } = req.body;
-    const owner = req.auth.userId;
+    const ownerId = req.user._id;
 
-    const hotel = await Hotel.findOne(owner);
+    const hotel = await Hotel.findOne({ owner: ownerId });
     if (!hotel) {
-      return res.json({ message: "Hotel not found" });
+      return res.json({ success: false, message: "Hotel not found" });
+    }
+    console.log("req.files:", req.files);
+
+    if (!req.files || req.files.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No files uploaded" });
     }
 
-    const UploadImages = req.files.map(async (file) => {
-      const response = await cloudinary.uploader.upload(file.path);
+    const uploadImages = await req.files.map(async (file) => {
+      const base64 = `data:${file.mimetype};base64,${file.buffer.toString(
+        "base64"
+      )}`;
+      const response = await cloudinary.uploader.upload(base64);
       return response.secure_url;
     });
 
-    const images = await Promise.all(UploadImages);
+    const images = await Promise.all(uploadImages);
     await Room.create({
       hotel: hotel._id,
       roomType,
@@ -45,8 +55,9 @@ export const getAllRooms = async (req, res) => {
 export const getAllRoomsByHotel = async (req, res) => {
   try {
     // const hotelId = req.params.hotelId;
-    const hotelId = req.auth.userId; // Assuming the hotel ID is the same as the authenticated user's ID
-    const rooms = await Room.find({ hotel: hotelId })
+    const userId = req.user._id; // Assuming the hotel ID is the same as the authenticated user's ID
+    const hotelId = await Hotel.findOne({ owner: userId });
+    const rooms = await Room.find({ hotel: hotelId._id })
       .populate("hotel")
       .sort({ createdAt: -1 });
     res.json({ success: true, rooms });

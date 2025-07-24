@@ -7,7 +7,7 @@ const AdminNavbar = () => {
   return (
     <nav className="fixed top-0 left-0 w-full h-20 flex items-center justify-between px-6 md:px-16 lg:px-24 z-100 bg-white shadow-md border-b">
       {/* Logo Section */}
-      <NavLink to="/owner" className="flex items-center gap-2">
+      <NavLink to="/" className="flex items-center gap-2">
         <img
           src={assets.logo}
           alt="Admin Logo"

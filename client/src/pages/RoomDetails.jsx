@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { roomsDummyData } from "../assets/assets";
+import { UseAppContext } from "../context/AppContext.jsx";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 import { Star, MapPin } from "lucide-react";
 import {
   Wifi,
@@ -20,8 +22,16 @@ import {
 
 const RoomDetails = () => {
   const { id } = useParams();
+  const { getToken, navigate, rooms } = UseAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [guests, setGuests] = useState(null);
+
+  const [isChecking, setIsChecking] = useState(false);
+
+  const [isAvailable, setIsAvailable] = useState(false);
   const amenitiesIcons = {
     "Free WiFi": <Wifi className="w-5 h-5 " />,
     "Room Service": <Utensils className="w-5 h-5 " />,
@@ -57,7 +67,7 @@ const RoomDetails = () => {
     "Guests will be allocated on the ground floor according to availability. You get a comfortable Two bedroom apartment that has a true city feeling. The price quoted is for two guests; please mark the number of guests to get the exact price for groups. The Guests will be allocated ground floor according to availability. You get the comfortable two bedroom apartment that has a true city feeling.";
 
   useEffect(() => {
-    const room = roomsDummyData.find((room) => room._id === id);
+    const room = rooms.find((room) => room._id === id);
     if (!room) {
       console.error("Room not found");
       return;
@@ -77,22 +87,192 @@ const RoomDetails = () => {
       guests: 1,
     },
   });
-  const handleSearch = (data) => {
-    const { checkIn, checkOut, guests } = data;
-    if (new Date(checkIn) >= new Date(checkOut)) {
-      alert("Check-in date must be before check-out date");
+
+  const checkAvailabilityHandler = async (data) => {
+    const token = await getToken();
+    if (!token) {
+      toast.error("Please login to check availability");
       return;
     }
-    console.log("Search submitted:", { checkIn, checkOut, guests });
+
+    const { checkInDate, checkOutDate } = data;
+
+    if (new Date(checkInDate) >= new Date(checkOutDate)) {
+      toast.error("Check-out date must be after check-in date");
+      return;
+    }
+
+    try {
+      setIsChecking(true);
+      const res = await axios.post(
+        "/api/bookings/check-availability",
+        {
+          room: id,
+          checkInDate,
+          checkOutDate,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        setIsAvailable(false);
+        return;
+      }
+
+      if (!res.data.isAvailable) {
+        toast.error("Room is not available");
+        setIsAvailable(false);
+      } else {
+        toast.success("Room is available!");
+        setIsAvailable(true);
+      }
+    } catch (error) {
+      toast.error("Error checking availability");
+      setIsAvailable(false);
+    } finally {
+      setIsChecking(false);
+    }
   };
+
+  const bookNowHandler = async (data) => {
+    const token = await getToken();
+    if (!token) {
+      toast.error("Please login to book");
+      return;
+    }
+
+    try {
+      const bookRes = await axios.post(
+        "/api/bookings/create-booking",
+        {
+          room: id,
+          checkInDate: data.checkInDate,
+          checkOutDate: data.checkOutDate,
+          guests: data.guests,
+          totalPrice: room.price,
+          hotel: room.hotel._id,
+          paymentMethod: "Cash (At Hotel)",
+          isPaid: false,
+          status: "Pending",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (bookRes.data.success) {
+        toast.success("Booking successful!");
+        navigate("/my-booking");
+        scrollTo(0, 0);
+      } else {
+        toast.error(bookRes.data.message);
+      }
+    } catch (error) {
+      toast.error("Error while booking");
+    }
+  };
+
+  // const onSubmitHandler = async (data) => {
+  //   console.log(data);
+  //   const token = await getToken();
+  //   console.log("token", token);
+
+  //   if (!token) {
+  //     toast.error("Please login to book this room");
+  //     return;
+  //   }
+
+  //   const { checkInDate, checkOutDate } = data;
+  //   console.log(checkInDate, checkOutDate);
+
+  //   if (new Date(checkInDate) >= new Date(checkOutDate)) {
+  //     toast.error("Check-out date must be after check-in date");
+  //     return;
+  //   }
+  //   console.log(checkInDate, checkOutDate);
+
+  //   // Step 1: Check availability
+  //   try {
+  //     const res = await axios.post(
+  //       "/api/bookings/check-availability",
+  //       {
+  //         room: id,
+  //         checkInDate,
+  //         checkOutDate,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     console.log(res.data);
+
+  //     if (!res.data.success) {
+  //       toast.error(res.data.message);
+  //       return;
+  //     }
+
+  //     if (!res.data.isAvailable) {
+  //       setIsAvailable(false);
+  //       toast.error("Room is not available for the selected dates");
+  //       return;
+  //     }
+
+  //     // Step 2: Proceed to create booking
+  //     setIsAvailable(true);
+  //     toast.success("Room is available. Booking now...");
+
+  //     const bookRes = await axios.post(
+  //       "/api/bookings/create-booking",
+  //       {
+  //         room: id,
+  //         checkInDate,
+  //         checkOutDate,
+  //         guests: data.guests,
+  //         totalPrice: room.price,
+  //         hotel: room.hotel._id,
+  //         paymentMethod: "Cash (At Hotel)",
+  //         isPaid: false,
+  //         status: "Pending",
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (bookRes.data.success) {
+  //       toast.success("Booking created successfully");
+  //       navigate("/my-booking");
+  //       scrollTo(0, 0);
+  //     } else {
+  //       toast.error(bookRes.data.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   return (
     room && (
       <div className="mt-32 px-6 md:px-16 lg:px-24 xl:px-28  ">
         {/* title */}
         <div className="flex items-center gap-x-3 flex-wrap mb-3">
-          <p className="text-3xl font-Poppins text-gray-800">Urbanza Suites</p>
-          <span className="text-sm text-gray-500 italic">(Double Bed)</span>
+          <p className="text-3xl font-Poppins text-gray-800">
+            {room.hotel.hotelName}
+          </p>
+          <span className="text-sm text-gray-500 italic">
+            ({room.roomType})
+          </span>
           <p className="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md">
             20% OFF
           </p>
@@ -161,7 +341,7 @@ const RoomDetails = () => {
             </p>
             {/* Amenities */}
             <div className="flex gap-2 flex-wrap mt-3 max-md:gap-x-4">
-              {room.amenities.map((amenity, index) => (
+              {room.facilities.map((amenity, index) => (
                 <React.Fragment key={index}>
                   <div
                     key={index}
@@ -172,18 +352,22 @@ const RoomDetails = () => {
                     )}
                     <span>{amenity}</span>
                   </div>
-                  {index < room.amenities.length - 1 && (
+                  {index < room.facilities.length - 1 && (
                     <div className="w-[3px] h-10 bg-gray-400 hidden md:block shadow-sm rounded self-center"></div>
                   )}
                 </React.Fragment>
               ))}
             </div>
           </div>
-          <span className="text-xl font-bold ">$399/night</span>
+          <span className="text-2xl font-poppins ">
+            ${room.price} <span className="text-sm text-gray-600"> /night</span>
+          </span>
         </div>
 
         <form
-          onSubmit={handleSubmit(handleSearch)}
+          onSubmit={handleSubmit(
+            isAvailable ? bookNowHandler : checkAvailabilityHandler
+          )}
           className="mt-16 bg-white rounded-2xl px-6 md:px-16 lg:px-24 xl:px-36 py-8 shadow-lg max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 flex-wrap"
         >
           {/* Check-in */}
@@ -198,14 +382,15 @@ const RoomDetails = () => {
             <input
               type="date"
               id="checkIn"
+              min={new Date().toISOString().split("T")[0]}
               className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              {...register("checkIn", {
+              {...register("checkInDate", {
                 required: "Check-in date is required",
               })}
             />
-            {errors.checkIn && (
+            {errors.checkInDate && (
               <span className="text-xs text-red-500 mt-1">
-                {errors.checkIn.message}
+                {errors.checkInDate.message}
               </span>
             )}
           </div>
@@ -222,14 +407,15 @@ const RoomDetails = () => {
             <input
               type="date"
               id="checkOut"
+              min={checkInDate || new Date().toISOString().split("T")[0]}
               className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              {...register("checkOut", {
+              {...register("checkOutDate", {
                 required: "Check-out date is required",
               })}
             />
-            {errors.checkOut && (
+            {errors.checkOutDate && (
               <span className="text-xs text-red-500 mt-1">
-                {errors.checkOut.message}
+                {errors.checkOutDate.message}
               </span>
             )}
           </div>
@@ -246,10 +432,10 @@ const RoomDetails = () => {
             <input
               type="number"
               id="guests"
-              min={1}
+              placeholder="0"
+              min={0}
               max={4}
               className="border border-gray-300 rounded-md px-4 py-2 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-black"
-              placeholder="0"
               {...register("guests", {
                 required: "Number of guests is required",
                 min: { value: 1, message: "At least 1 guest required" },
@@ -263,14 +449,19 @@ const RoomDetails = () => {
             )}
           </div>
 
-          {/* Search Button */}
+          {/* Submit Button */}
           <div className="w-full md:w-auto">
             <button
               type="submit"
+              disabled={isChecking}
               className="w-full md:w-auto flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-md text-sm font-medium transition"
             >
               <SearchIcon className="w-4 h-4" />
-              Check Availability
+              {isAvailable
+                ? "Book Now"
+                : isChecking
+                ? "Checking..."
+                : "Check Availability"}
             </button>
           </div>
         </form>

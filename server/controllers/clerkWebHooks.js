@@ -4,7 +4,7 @@ import { Webhook } from "svix";
 import dotenv from "dotenv";
 dotenv.config();
 
-const clerkWebhookSecret = async (req, res) => {
+export const clerkWebhookSecret = async (req, res) => {
   try {
     const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 

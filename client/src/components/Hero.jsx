@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { UseAppContext } from "../context/AppContext";
 import {
   Globe,
   LogIn,
@@ -8,8 +9,10 @@ import {
   SearchIcon,
   Navigation,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const Hero = () => {
+  const { getToken, navigate } = UseAppContext();
   const {
     register,
     handleSubmit,
@@ -17,11 +20,14 @@ const Hero = () => {
     reset,
   } = useForm();
 
+  const [destination, setDestination] = useState("");
+
   const handleSearch = (e) => {
     const { destination, checkIn, checkOut, guests } = e;
+    navigate(`/hotels?destination=${destination}`);
 
     if (new Date(checkIn) >= new Date(checkOut)) {
-      alert("Check-in date must be before check-out date");
+      toast.error("Check-in date must be before check-out date");
       return;
     }
 
@@ -62,6 +68,7 @@ const Hero = () => {
             list="destinations"
             id="destination"
             type="text"
+            onChange={(e) => setDestination(e.target.value)}
             className="rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
             placeholder="Type here"
             {...register("destination", {

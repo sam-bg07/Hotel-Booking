@@ -9,6 +9,7 @@ import hotelRouter from "./routes/hotelRouter.js";
 import roomRouter from "./routes/roomRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
 import { connectCloudinary } from "./config/cloudinary.js";
+import { stripeWebhook } from "./controllers/stripeWebhook.js";
 
 dotenv.config(); // Load .env variables
 
@@ -26,6 +27,13 @@ app.use(
     },
     credentials: true,
   })
+);
+
+//api to lisen stripe webhook
+app.post(
+  "/api/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
 );
 app.use(express.json());
 app.use(clerkMiddleware());

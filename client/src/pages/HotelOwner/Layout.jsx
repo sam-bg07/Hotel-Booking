@@ -1,9 +1,16 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import AdminNavbar from "../../components/HotelOwner/AdminNavbar";
 import SideBar from "../../components/HotelOwner/SideBar";
 import { Outlet } from "react-router-dom";
+import { UseAppContext } from "../../context/AppContext.jsx";
 
 const Layout = () => {
+  const { isOwner, navigate } = UseAppContext();
+  useEffect(() => {
+    if (!isOwner) {
+      navigate("/");
+    }
+  }, [isOwner]);
   return (
     <div className="flex">
       {/* Sidebar on the left */}

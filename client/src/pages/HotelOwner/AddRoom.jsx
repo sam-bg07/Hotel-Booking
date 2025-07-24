@@ -1,16 +1,28 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { UseAppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
+import axios from "axios";
 
-const facilitiesList = ["WiFi", "AC", "TV", "Parking", "Mini Fridge", "Geyser"];
+const facilitiesList = [
+  "Free WiFi",
+  "Free Breakfast",
+  "Room Service",
+  "Mountain View",
+  "Pool Access",
+];
 
 const AddRoomForm = () => {
+  const { getToken } = UseAppContext();
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
   } = useForm();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState([null, null, null, null]);
 
   const handleImageChange = (e, index) => {
@@ -22,14 +34,49 @@ const AddRoomForm = () => {
     }
   };
 
-  const onSubmit = (data) => {
-    const images = data.images.map((f) => f[0]);
-    const roomData = {
-      ...data,
-      images,
-    };
-    console.log("Room Data:", roomData);
-    // Send to API
+  const onSubmit = async (data) => {
+    try {
+      setIsLoading(true);
+      const token = await getToken(); // ⬅ make sure to await this if it's async
+      if (!token) {
+        toast.error("You are not logged in");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("roomType", data.roomType);
+      formData.append("price", data.price);
+      formData.append("facilities", JSON.stringify(data.facilities || []));
+
+      data.images.forEach((fileList) => {
+        const file = fileList[0];
+        if (file) {
+          formData.append("images", file);
+        }
+      });
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      const { data: responseData } = await axios.post("/api/rooms", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (responseData.success) {
+        toast.success(responseData.message);
+        reset();
+        setPreviewImages([null, null, null, null]);
+      } else {
+        toast.error(responseData.message);
+      }
+    } catch (error) {
+      console.error(error.message);
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,8 +110,9 @@ const AddRoomForm = () => {
                 )}
                 <input
                   type="file"
+                  multiple
                   accept="image/*"
-                  {...register(`images[${index}]`, {
+                  {...register(`images.${index}`, {
                     required: "All 4 images are required",
                   })}
                   onChange={(e) => handleImageChange(e, index)}
@@ -90,8 +138,8 @@ const AddRoomForm = () => {
               <option value="">Select a room type</option>
               <option value="Single Bed">Single Bed</option>
               <option value="Double Bed">Double Bed</option>
-              <option value="Deluxe Room">Deluxe Room</option>
-              <option value="Suite">Suite</option>
+              <option value="Deluxe Room">Luxury Room</option>
+              <option value="Suite">Family Suite</option>
             </select>
             {errors.roomType && (
               <p className="text-red-500 text-sm mt-1">
@@ -142,9 +190,10 @@ const AddRoomForm = () => {
         <div>
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium cursor-pointer"
           >
-            Add Room
+            {isLoading ? "Adding..." : "Add Room"}
           </button>
         </div>
       </form>
