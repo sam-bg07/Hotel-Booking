@@ -144,7 +144,7 @@ const MyBooking = () => {
                     Pending
                   </span>
                   <button
-                    className="mt-1 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md shadow"
+                    className="mt-1 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md shadow cursor-pointer"
                     onClick={() => handlePayment(booking._id)}
                   >
                     Pay Now

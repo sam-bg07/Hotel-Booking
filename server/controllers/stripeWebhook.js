@@ -4,11 +4,18 @@ import Booking from "../models/Booking.js";
 // api to handle stripe payment
 
 export const stripeWebhook = async (req, res) => {
+  console.log("✅ stripeWebhook route hit");
+  console.log("Headers:", req.headers);
+  console.log("Raw body type:", typeof req.body);
+  console.log("Raw body value:", req.body);
+  console.log("Raw body length:", req.rawBody ? req.rawBody.length : "undefined");
   const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
   const signature = req.headers["stripe-signature"];
   let event;
 
   try {
+    console.log("Received webhook event:", req.body);
+    console.log("webhook event:", signature);
     event = stripeInstance.webhooks.constructEvent(
       req.body,
       signature,

@@ -185,14 +185,14 @@ export const getAllBookingsByHotel = async (req, res) => {
 export const stripePayment = async (req, res) => {
   try {
     const { bookingId } = req.body;
-    console.log("Booking ID:", bookingId);
+    // console.log("Booking ID:", bookingId);
     const booking = await Booking.findById(bookingId);
     const roomData = await Room.findById(booking.room);
     if (!booking || !roomData) {
       return res.json({ success: false, message: "Booking or room not found" });
     }
     const totalAmount = booking.totalPrice;
-    console.log("Total Amount:", totalAmount);
+    // console.log("Total Amount:", totalAmount);
     const { origin } = req.headers;
 
     const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
@@ -220,6 +220,11 @@ export const stripePayment = async (req, res) => {
         bookingId,
       },
     });
+
+    // Remove premature update of booking status here
+    // booking.isPaid = true;
+    // booking.paymentMethod = "Stripe";
+    // await booking.save();
 
     res.json({
       success: true,

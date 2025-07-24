@@ -454,7 +454,7 @@ const RoomDetails = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="w-full md:w-auto flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-md text-sm font-medium transition"
+              className="w-full md:w-auto flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-md text-sm font-medium transition cursor-pointer"
             >
               <SearchIcon className="w-4 h-4" />
               {isAvailable

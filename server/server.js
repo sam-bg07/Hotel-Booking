@@ -16,6 +16,15 @@ dotenv.config(); // Load .env variables
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+connectDB();
+connectCloudinary();
+
+app.use(
+  "/api/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
+
 const allowedOrigins = ["http://localhost:5173"];
 app.use(
   cors({
@@ -30,18 +39,11 @@ app.use(
 );
 
 //api to lisen stripe webhook
-app.post(
-  "/api/stripe",
-  express.raw({ type: "application/json" }),
-  stripeWebhook
-);
+
 app.use(express.json());
 app.use(clerkMiddleware());
 // Define the webhook route
 app.post("/api/clerk", clerkWebhookSecret);
-
-connectDB();
-connectCloudinary();
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Hotel Booking API after Connecting to MongoDB!");
