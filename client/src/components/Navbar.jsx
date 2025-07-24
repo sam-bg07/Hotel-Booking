@@ -11,7 +11,6 @@ import Loader from "./Loader.jsx";
 const Navbar = () => {
   // const { user, navigate, isOwner, setShowHotelReg } = UseAppContext();
   const context = UseAppContext();
-  console.log("App Context:", context);
 
   if (!context) return <p>Context not found</p>;
 
