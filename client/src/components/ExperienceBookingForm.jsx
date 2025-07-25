@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import ExperienceAnimatedSection from "./ExperienceAnimatedSection";
 import { motion } from "framer-motion";
 import {
@@ -8,7 +9,6 @@ import {
   Palette,
   Heart,
   Calendar,
-  Clock,
   Phone,
   Mail,
   User,
@@ -18,68 +18,34 @@ import {
 } from "lucide-react";
 import ExperienceCustomSelect from "./ExperienceCustomSelect";
 import Toast from "./Toast";
+import { toast } from "react-hot-toast";
+import axios from "axios";
+import { UseAppContext } from "../context/AppContext";
 
 const ExperienceBookingForm = ({ selectedExperience }) => {
+  const { getToken } = UseAppContext();
   const [toast, setToast] = useState(null);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    experience: selectedExperience || "",
-    date: "",
-    rating: "",
-    feedback: "",
-    specialRequests: "",
-    agreeToTerms: false,
-  });
-  const experiences = [
-    {
-      id: "sunset-trek",
-      title: "Sunset Trek",
-      description:
-        "Embark on a breathtaking mountain adventure as the sun sets, creating unforgettable panoramic views and memories.",
-      icon: Mountain,
-      color: "bg-orange-100 text-orange-600",
-    },
-    {
-      id: "luxury-spa",
-      title: "Luxury Spa Retreat",
-      description:
-        "Indulge in premium wellness treatments designed to rejuvenate your mind, body, and soul with world-class therapies.",
-      icon: Sparkles,
-      color: "bg-purple-100 text-purple-600",
-    },
-    {
-      id: "culinary-journey",
-      title: "Culinary Journey",
-      description:
-        "Discover exquisite flavors through chef-curated dining experiences and hands-on cooking classes with local ingredients.",
-      icon: ChefHat,
-      color: "bg-green-100 text-green-600",
-    },
-    {
-      id: "cultural-workshop",
-      title: "Cultural Workshop",
-      description:
-        "Immerse yourself in local traditions through interactive art workshops, music sessions, and cultural storytelling.",
-      icon: Palette,
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      id: "family-adventure",
-      title: "Family Adventure",
-      description:
-        "Create lasting family memories with specially designed activities that bring generations together for fun and bonding.",
-      icon: Heart,
-      color: "bg-pink-100 text-pink-600",
-    },
-  ];
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 60 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
 
-  const [errors, setErrors] = useState({});
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm({
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      experience: selectedExperience || "",
+      date: "",
+      rating: "",
+      feedback: "",
+      specialRequests: "",
+      agreeToTerms: false,
+    },
+  });
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -89,59 +55,112 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
     setToast(null);
   };
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+  const [bookings, setBookings] = useState([]);
 
-  const validateForm = () => {
-    const newErrors = {};
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
 
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email is invalid";
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
-    if (!formData.experience)
-      newErrors.experience = "Please select an experience";
-    if (!formData.date) newErrors.date = "Date is required";
-    if (!formData.rating) newErrors.rating = "Rating is required";
-    if (!formData.feedback.trim()) newErrors.feedback = "Feedback is required";
-    if (!formData.agreeToTerms)
-      newErrors.agreeToTerms = "You must agree to terms and conditions";
+        const res = await axios.get("/api/bookings/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+        if (res.data.success) {
+          setBookings(res.data.bookings);
+        } else {
+          toast.error("Failed to fetch bookings");
+        }
+      } catch (error) {
+        toast.error("Error fetching bookings");
+      }
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    fetchBookings();
+  }, []);
+  const onSubmit = async (formData) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("You are not logged in");
+        return;
+      }
 
-    if (validateForm()) {
-      showToast("We'll contact you soon to confirm your experience.");
+      if (bookings.length === 0) {
+        console.log("You must book a hotel room before booking an experience.");
+        return;
+      }
 
-      // Reset form
-      setFormData({
-        fullName: "",
-        email: "",
-        phone: "",
-        experience: "",
-        date: "",
-        rating: "",
-        feedback: "",
-        specialRequests: "",
-        agreeToTerms: false,
+      // Get most recent booking ID
+      const latestBooking = bookings[0];
+      const payload = {
+        ...formData,
+        bookingId: latestBooking._id,
+      };
+
+      const { data } = await axios.post("/api/experiences", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      if (data.success) {
+        toast.success(data.message);
+        reset();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log("Error occurred during experience booking:", error.message);
     }
   };
 
   useEffect(() => {
     if (selectedExperience) {
-      setFormData((prev) => ({ ...prev, experience: selectedExperience }));
+      setValue("experience", selectedExperience);
     }
-  }, [selectedExperience]);
+  }, [selectedExperience, setValue]);
+
+  const experiences = [
+    {
+      id: "sunset-trek",
+      title: "Sunset Trek",
+      icon: Mountain,
+      color: "bg-orange-100 text-orange-600",
+    },
+    {
+      id: "luxury-spa",
+      title: "Luxury Spa Retreat",
+      icon: Sparkles,
+      color: "bg-purple-100 text-purple-600",
+    },
+    {
+      id: "culinary-journey",
+      title: "Culinary Journey",
+      icon: ChefHat,
+      color: "bg-green-100 text-green-600",
+    },
+    {
+      id: "cultural-workshop",
+      title: "Cultural Workshop",
+      icon: Palette,
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      id: "family-adventure",
+      title: "Family Adventure",
+      icon: Heart,
+      color: "bg-pink-100 text-pink-600",
+    },
+  ];
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 60 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
 
   return (
     <ExperienceAnimatedSection id="booking-form" className="py-16 px-4">
@@ -161,23 +180,15 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
           </p>
         </motion.div>
 
-        {/* Booking Form Card - Same styling as experience cards and review cards */}
         <div className="bg-white rounded-2xl p-6 shadow-xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Full Name */}
             <div className="space-y-2">
-              <label
-                htmlFor="fullName"
-                className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-              >
-                <User className="w-4 h-4" />
-                Full Name
+              <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                <User className="w-4 h-4" /> Full Name
               </label>
               <input
-                id="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                {...register("fullName", { required: "Full name is required" })}
                 className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 ${
                   errors.fullName
                     ? "border-red-500 focus:ring-red-200"
@@ -186,24 +197,26 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
                 placeholder="Enter your full name"
               />
               {errors.fullName && (
-                <p className="text-red-500 text-sm">{errors.fullName}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.fullName.message}
+                </p>
               )}
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-              >
-                <Mail className="w-4 h-4" />
-                Email
+              <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                <Mail className="w-4 h-4" /> Email
               </label>
               <input
-                id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Email is invalid",
+                  },
+                })}
                 className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 ${
                   errors.email
                     ? "border-red-500 focus:ring-red-200"
@@ -212,24 +225,17 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
                 placeholder="Enter your email address"
               />
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email}</p>
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
               )}
             </div>
 
-            {/* Phone Number */}
+            {/* Phone */}
             <div className="space-y-2">
-              <label
-                htmlFor="phone"
-                className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-              >
-                <Phone className="w-4 h-4" />
-                Phone Number
+              <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                <Phone className="w-4 h-4" /> Phone Number
               </label>
               <input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                {...register("phone", { required: "Phone number is required" })}
                 className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 ${
                   errors.phone
                     ? "border-red-500 focus:ring-red-200"
@@ -238,50 +244,50 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
                 placeholder="Enter your phone number"
               />
               {errors.phone && (
-                <p className="text-red-500 text-sm">{errors.phone}</p>
+                <p className="text-red-500 text-sm">{errors.phone.message}</p>
               )}
             </div>
 
-            {/* Select Experience */}
+            {/* Experience */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
-                <Sparkles className="w-4 h-4" />
-                Select Experience
+                <Sparkles className="w-4 h-4" /> Select Experience
               </label>
-              <ExperienceCustomSelect
-                value={formData.experience}
-                onChange={(value) => handleInputChange("experience", value)}
-                placeholder="Choose your experience"
-                error={errors.experience}
-                className="cursor-pointer"
-              >
-                {experiences.map((experience) => (
-                  <option key={experience.id} value={experience.id}>
-                    {experience.title}
-                  </option>
-                ))}
-              </ExperienceCustomSelect>
+              <Controller
+                name="experience"
+                control={control}
+                rules={{ required: "Please select an experience" }}
+                render={({ field }) => (
+                  <ExperienceCustomSelect
+                    {...field}
+                    placeholder="Choose your experience"
+                    error={errors.experience?.message}
+                    className="cursor-pointer"
+                  >
+                    {experiences.map((exp) => (
+                      <option key={exp.id} value={exp.id}>
+                        {exp.title}
+                      </option>
+                    ))}
+                  </ExperienceCustomSelect>
+                )}
+              />
               {errors.experience && (
-                <p className="text-red-500 text-sm">{errors.experience}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.experience.message}
+                </p>
               )}
             </div>
 
-            {/* Date and Time Slot Row */}
+            {/* Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Date */}
               <div className="space-y-2">
-                <label
-                  htmlFor="date"
-                  className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-                >
-                  <Calendar className="w-4 h-4" />
-                  Date
+                <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                  <Calendar className="w-4 h-4" /> Date
                 </label>
                 <input
-                  id="date"
                   type="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange("date", e.target.value)}
+                  {...register("date", { required: "Date is required" })}
                   className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 ${
                     errors.date
                       ? "border-red-500 focus:ring-red-200"
@@ -289,53 +295,49 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
                   }`}
                 />
                 {errors.date && (
-                  <p className="text-red-500 text-sm">{errors.date}</p>
+                  <p className="text-red-500 text-sm">{errors.date.message}</p>
                 )}
               </div>
 
               {/* Rating */}
               <div className="space-y-2">
-                <label
-                  htmlFor="rating"
-                  className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-                >
-                  <Star className="w-4 h-4" />
-                  Rating
+                <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                  <Star className="w-4 h-4" /> Rating
                 </label>
-                <ExperienceCustomSelect
-                  value={formData.rating}
-                  onChange={(value) => handleInputChange("rating", value)}
-                  placeholder="Select rating"
-                  error={errors.rating}
-                  className="cursor-pointer"
-                >
-                  <option value="1"> ⭐</option>
-                  <option value="2"> ⭐⭐</option>
-                  <option value="3"> ⭐⭐⭐</option>
-                  <option value="4"> ⭐⭐⭐⭐</option>
-                  <option value="5"> ⭐⭐⭐⭐⭐</option>
-                </ExperienceCustomSelect>
+                <Controller
+                  name="rating"
+                  control={control}
+                  rules={{ required: "Rating is required" }}
+                  render={({ field }) => (
+                    <ExperienceCustomSelect
+                      {...field}
+                      placeholder="Select rating"
+                      error={errors.rating?.message}
+                      className="cursor-pointer"
+                    >
+                      <option value="1">⭐</option>
+                      <option value="2">⭐⭐</option>
+                      <option value="3">⭐⭐⭐</option>
+                      <option value="4">⭐⭐⭐⭐</option>
+                      <option value="5">⭐⭐⭐⭐⭐</option>
+                    </ExperienceCustomSelect>
+                  )}
+                />
                 {errors.rating && (
-                  <p className="text-red-500 text-sm">{errors.rating}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.rating.message}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Special Requests */}
             <div className="space-y-2">
-              <label
-                htmlFor="specialRequests"
-                className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-              >
-                <MessageSquare className="w-4 h-4" />
-                Special Requests
+              <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                <MessageSquare className="w-4 h-4" /> Special Requests
               </label>
               <textarea
-                id="specialRequests"
-                value={formData.specialRequests}
-                onChange={(e) =>
-                  handleInputChange("specialRequests", e.target.value)
-                }
+                {...register("specialRequests")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 resize-none"
                 placeholder="Any special requirements or requests..."
                 rows={2}
@@ -344,54 +346,51 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
 
             {/* Feedback */}
             <div className="space-y-2">
-              <label
-                htmlFor="feedback"
-                className="flex items-center gap-2 text-gray-700 font-medium text-sm"
-              >
-                <MessageSquare className="w-4 h-4" />
-                Feedback
+              <label className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+                <MessageSquare className="w-4 h-4" /> Feedback
               </label>
               <textarea
-                id="feedback"
-                value={formData.feedback}
-                onChange={(e) => handleInputChange("feedback", e.target.value)}
+                {...register("feedback", { required: "Feedback is required" })}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 resize-none"
                 placeholder="Your feedback is valuable to us..."
                 rows={4}
               />
+              {errors.feedback && (
+                <p className="text-red-500 text-sm">
+                  {errors.feedback.message}
+                </p>
+              )}
             </div>
 
-            {/* Terms Checkbox */}
+            {/* Agree to Terms */}
             <div className="flex items-center space-x-2">
               <input
-                id="agreeToTerms"
                 type="checkbox"
-                checked={formData.agreeToTerms}
-                onChange={(e) =>
-                  handleInputChange("agreeToTerms", e.target.checked)
-                }
+                {...register("agreeToTerms", {
+                  validate: (v) =>
+                    v || "You must agree to terms and conditions",
+                })}
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
               />
-              <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
+              <label className="text-sm text-gray-700">
                 I agree to the terms & conditions
               </label>
             </div>
             {errors.agreeToTerms && (
-              <p className="text-red-500 text-sm">{errors.agreeToTerms}</p>
+              <p className="text-red-500 text-sm">
+                {errors.agreeToTerms.message}
+              </p>
             )}
 
-            {/* Submit Button - Same styling as card buttons */}
             <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-200 flex items-center justify-center cursor-pointer"
             >
-              <Check className="w-5 h-5 mr-2" />
-              Book Experience
+              <Check className="w-5 h-5 mr-2" /> Book Experience
             </button>
           </form>
         </div>
 
-        {/* Toast Notification */}
         {toast && (
           <Toast
             message={toast.message}

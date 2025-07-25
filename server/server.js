@@ -8,6 +8,7 @@ import userRouter from "./routes/userRouter.js";
 import hotelRouter from "./routes/hotelRouter.js";
 import roomRouter from "./routes/roomRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
+import experienceRouter from "./routes/experienceRouter.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 import { stripeWebhook } from "./controllers/stripeWebhook.js";
 
@@ -52,6 +53,7 @@ app.use("/api/user", userRouter);
 app.use("/api/hotels", hotelRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
+app.use("/api/experiences", experienceRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
