@@ -17,14 +17,12 @@ import {
   Star,
 } from "lucide-react";
 import ExperienceCustomSelect from "./ExperienceCustomSelect";
-import Toast from "./Toast";
-import { toast } from "react-hot-toast";
 import axios from "axios";
 import { UseAppContext } from "../context/AppContext";
+import { toast } from "react-hot-toast";
 
 const ExperienceBookingForm = ({ selectedExperience }) => {
   const { getToken } = UseAppContext();
-  const [toast, setToast] = useState(null);
 
   const {
     register,
@@ -46,14 +44,6 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
       agreeToTerms: false,
     },
   });
-
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-  };
-
-  const hideToast = () => {
-    setToast(null);
-  };
 
   const [bookings, setBookings] = useState([]);
 
@@ -390,14 +380,6 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
             </button>
           </form>
         </div>
-
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={hideToast}
-          />
-        )}
       </div>
     </ExperienceAnimatedSection>
   );

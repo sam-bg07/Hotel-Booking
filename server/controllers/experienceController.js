@@ -24,7 +24,7 @@ export const createExperienceBooking = async (req, res) => {
     }
 
     // 3. Prevent duplicate experience bookings
-    const alreadyBooked = await Experience.findOne({ booking: bookingId });
+    const alreadyBooked = await Experience.findOne({ bookingId: bookingId });
     if (alreadyBooked) {
       return res.status(409).json({
         message: "Experience already booked for this stay.",
@@ -42,6 +42,24 @@ export const createExperienceBooking = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating experience booking:", error);
+    res.status(500).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+};
+
+export const getExperienceBookings = async (req, res) => {
+  try {
+    const experienceBookings = await Experience.find()
+      .populate({ path: "bookingId", populate: { path: "hotel" } })
+      .sort({ createdAt: -1, rating: -1 });
+    res.status(200).json({
+      success: true,
+      experienceBookings,
+    });
+  } catch (error) {
+    console.error("Error fetching experience bookings:", error);
     res.status(500).json({
       message: "Server error",
       success: false,

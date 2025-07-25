@@ -89,6 +89,9 @@ export const createBooking = async (req, res) => {
       paymentMethod: "Cash",
       isPaid: false,
     });
+
+    const roomData1 = await Room.findById(room).populate("hotel");
+
     const mailOptions = {
       from: "samarthgabani2005@gmail.com",
       to: req.user.email,
@@ -100,10 +103,10 @@ export const createBooking = async (req, res) => {
       <ul>
         <li><strong>Booking ID:</strong> ${booking._id}</li>
         <li><strong>Hotel:</strong> ${
-          roomData.hotel?.hotelName || "Hotel Name"
+          roomData1?.hotel?.hotelName || "Hotel Name"
         }</li>
         <li><strong>Location:</strong> ${
-          roomData.hotel?.address || "Hotel Address"
+          roomData1?.hotel?.address || "Hotel Address"
         }</li>
         <li><strong>Check-in Date:</strong> ${checkIn.toDateString()}</li>
         <li><strong>Check-out Date:</strong> ${checkOut.toDateString()}</li>
@@ -115,7 +118,7 @@ export const createBooking = async (req, res) => {
     `,
     };
     // console.log(mailOptions);
-    await transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Email send failed:", error); // 🔥 this will show SMTP error
       } else {

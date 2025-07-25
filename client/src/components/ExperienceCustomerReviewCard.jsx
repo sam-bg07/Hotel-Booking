@@ -1,13 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  Calendar,
-  Clock,
-  Users,
-  MessageSquare,
-  Check,
-  Star,
-  Quote,
-} from "lucide-react";
+import { Calendar, MessageSquare, Star, Quote } from "lucide-react";
 
 const ExperienceCustomerReviewCard = ({ review }) => {
   const formatDate = (dateString) => {
@@ -34,7 +26,7 @@ const ExperienceCustomerReviewCard = ({ review }) => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
-  const ExperienceIcon = review.experienceIcon;
+  // const ExperienceIcon = review.experienceIcon;
 
   return (
     <motion.div
@@ -42,9 +34,7 @@ const ExperienceCustomerReviewCard = ({ review }) => {
       className="bg-white rounded-2xl min-h-80 p-6 shadow-xl hover:shadow-2xl transition-all duration-300 group overflow-hidden relative"
     >
       {/* Gradient Background Accent */}
-      <div
-        className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b ${review.gradientFrom} ${review.gradientTo}`}
-      />
+      <div className={`absolute top-0 left-0 w-2 h-full `} />
 
       {/* Quote Icon */}
       <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
@@ -55,11 +45,9 @@ const ExperienceCustomerReviewCard = ({ review }) => {
         {/* Left Side - User Info */}
         <div className="flex-shrink-0 flex flex-col items-center text-center lg:text-left w-[20%]">
           {/* Avatar with gradient border */}
-          <div
-            className={`p-1 rounded-full bg-gradient-to-r ${review.gradientFrom} ${review.gradientTo} mb-4`}
-          >
+          <div className={`p-1 rounded-full  mb-4`}>
             <img
-              src={review.avatar || "/placeholder.svg?height=80&width=80"}
+              src={review?.avatar || "badme hai badme"}
               alt={review.fullName}
               className="w-20 h-20 rounded-full object-cover bg-white"
             />
@@ -70,7 +58,10 @@ const ExperienceCustomerReviewCard = ({ review }) => {
             <h3 className="text-xl font-bold text-gray-900 mb-1">
               {review.fullName}
             </h3>
-            <p className="text-sm text-gray-500 mb-2">{review.location}</p>
+            <p className="text-sm text-gray-500 mb-2">
+              {review.bookingId?.hotel.address || "Unknown address"} ,{" "}
+              {review.bookingId?.hotel.city || "Unknown city"}
+            </p>
             <div className="flex items-center justify-center lg:justify-start gap-1 mb-3">
               {renderStars(review.rating)}
             </div>
@@ -78,10 +69,10 @@ const ExperienceCustomerReviewCard = ({ review }) => {
 
           {/* Experience Badge */}
           <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${review.gradientFrom} ${review.gradientTo} text-white text-sm font-medium mb-4`}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r  text-white text-sm font-medium mb-4`}
           >
-            <ExperienceIcon className="w-4 h-4" />
-            {review.experienceName}
+            {/* <ExperienceIcon className="w-4 h-4" /> */}
+            {review.experience}
           </div>
         </div>
 
@@ -91,14 +82,14 @@ const ExperienceCustomerReviewCard = ({ review }) => {
           <div className="flex flex-wrap gap-3 mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
               <Calendar className="w-4 h-4" />
-              {formatDate(review.dateOfExperience)}
+              {formatDate(review.date)}
             </div>
           </div>
 
           {/* Customer Feedback */}
           <div className="space-y-3">
             <blockquote className="text-gray-700 leading-relaxed text-lg italic relative">
-              "{review.customerFeedback}"
+              "{review.feedback}"
             </blockquote>
 
             {/* Special Requests */}

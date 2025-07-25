@@ -26,8 +26,6 @@ const RoomDetails = () => {
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [checkInDate, setCheckInDate] = useState(null);
-  const [checkOutDate, setCheckOutDate] = useState(null);
-  const [guests, setGuests] = useState(null);
 
   const [isChecking, setIsChecking] = useState(false);
 
@@ -74,7 +72,7 @@ const RoomDetails = () => {
     }
     room && setRoom(room);
     room && setMainImage(room.images[0]);
-  }, [room]);
+  }, [rooms, id]);
 
   const {
     register,
@@ -178,89 +176,6 @@ const RoomDetails = () => {
       toast.error("Error while booking");
     }
   };
-
-  // const onSubmitHandler = async (data) => {
-  //   console.log(data);
-  //   const token = await getToken();
-  //   console.log("token", token);
-
-  //   if (!token) {
-  //     toast.error("Please login to book this room");
-  //     return;
-  //   }
-
-  //   const { checkInDate, checkOutDate } = data;
-  //   console.log(checkInDate, checkOutDate);
-
-  //   if (new Date(checkInDate) >= new Date(checkOutDate)) {
-  //     toast.error("Check-out date must be after check-in date");
-  //     return;
-  //   }
-  //   console.log(checkInDate, checkOutDate);
-
-  //   // Step 1: Check availability
-  //   try {
-  //     const res = await axios.post(
-  //       "/api/bookings/check-availability",
-  //       {
-  //         room: id,
-  //         checkInDate,
-  //         checkOutDate,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //     console.log(res.data);
-
-  //     if (!res.data.success) {
-  //       toast.error(res.data.message);
-  //       return;
-  //     }
-
-  //     if (!res.data.isAvailable) {
-  //       setIsAvailable(false);
-  //       toast.error("Room is not available for the selected dates");
-  //       return;
-  //     }
-
-  //     // Step 2: Proceed to create booking
-  //     setIsAvailable(true);
-  //     toast.success("Room is available. Booking now...");
-
-  //     const bookRes = await axios.post(
-  //       "/api/bookings/create-booking",
-  //       {
-  //         room: id,
-  //         checkInDate,
-  //         checkOutDate,
-  //         guests: data.guests,
-  //         totalPrice: room.price,
-  //         hotel: room.hotel._id,
-  //         paymentMethod: "Cash (At Hotel)",
-  //         isPaid: false,
-  //         status: "Pending",
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (bookRes.data.success) {
-  //       toast.success("Booking created successfully");
-  //       navigate("/my-booking");
-  //       scrollTo(0, 0);
-  //     } else {
-  //       toast.error(bookRes.data.message);
-  //     }
-  //   } catch (error) {
-  //     toast.error(error.message);
-  //   }
-  // };
 
   return (
     room && (

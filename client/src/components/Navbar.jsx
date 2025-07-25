@@ -177,7 +177,7 @@ const Navbar = () => {
                     />
                   </svg>
                 }
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/my-booking")}
               />
             </UserButton.MenuItems>
           </UserButton>

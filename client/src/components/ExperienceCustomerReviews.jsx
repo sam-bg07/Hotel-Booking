@@ -3,6 +3,10 @@ import { motion } from "framer-motion";
 import ExperienceAnimatedSection from "./ExperienceAnimatedSection";
 import { Sparkles, Mountain, ChefHat } from "lucide-react";
 import ExperienceCustomerReviewCard from "./ExperienceCustomerReviewCard";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { UseAppContext } from "../context/AppContext.jsx";
 
 const ExperienceCustomerReviews = () => {
   const customerReviews = [
@@ -67,6 +71,30 @@ const ExperienceCustomerReviews = () => {
       },
     },
   };
+  const { getToken } = UseAppContext();
+  const [experience, setExperience] = useState([]);
+
+  useEffect(() => {
+    const fetchexperience = async () => {
+      try {
+        const { data } = await axios.get("/api/experiences", {
+          headers: {
+            Authorization: `Bearer ${await getToken()}`,
+          },
+        });
+
+        if (data.success) {
+          setExperience(data.experienceBookings);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+    fetchexperience();
+  }, []);
+
   return (
     <ExperienceAnimatedSection className="py-16 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -93,8 +121,8 @@ const ExperienceCustomerReviews = () => {
           variants={staggerContainer}
           className="space-y-8"
         >
-          {customerReviews.map((review) => (
-            <ExperienceCustomerReviewCard key={review.id} review={review} />
+          {experience.map((review) => (
+            <ExperienceCustomerReviewCard key={review._id} review={review} />
           ))}
         </motion.div>
       </div>

@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const experienceBookingSchema = new mongoose.Schema(
   {
-    booking: {
-      type: mongoose.Schema.Types.ObjectId,
+    bookingId: {
+      type: String,
       ref: "Booking",
       required: true,
     },
@@ -14,11 +14,6 @@ const experienceBookingSchema = new mongoose.Schema(
       match: [/\S+@\S+\.\S+/, "Invalid email format"],
     },
     phone: { type: String, required: true },
-    booking: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking",
-      required: true,
-    },
     experience: {
       type: String,
       required: true,
@@ -30,20 +25,15 @@ const experienceBookingSchema = new mongoose.Schema(
         "family-adventure",
       ],
     },
-
     date: { type: Date, required: true },
-
     rating: {
       type: Number,
       min: 1,
       max: 5,
       required: true,
     },
-
     specialRequests: { type: String },
-
     feedback: { type: String, required: true },
-
     agreeToTerms: { type: Boolean, required: true },
   },
   { timestamps: true }
