@@ -52,7 +52,10 @@ export const createExperienceBooking = async (req, res) => {
 export const getExperienceBookings = async (req, res) => {
   try {
     const experienceBookings = await Experience.find()
-      .populate({ path: "bookingId", populate: { path: "hotel" } })
+      .populate({
+        path: "bookingId",
+        populate: [{ path: "hotel" }, { path: "user" }],
+      })
       .sort({ createdAt: -1, rating: -1 });
     res.status(200).json({
       success: true,

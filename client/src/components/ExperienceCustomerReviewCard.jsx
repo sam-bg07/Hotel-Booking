@@ -47,7 +47,7 @@ const ExperienceCustomerReviewCard = ({ review }) => {
           {/* Avatar with gradient border */}
           <div className={`p-1 rounded-full  mb-4`}>
             <img
-              src={review?.avatar || "badme hai badme"}
+              src={review?.bookingId?.user?.image || "badme hai badme"}
               alt={review.fullName}
               className="w-20 h-20 rounded-full object-cover bg-white"
             />
