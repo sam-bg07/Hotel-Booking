@@ -1,13 +1,18 @@
-name: Redeploy backend on push
+name: Redeploy backend and frontend on push
 on:
   push:
-    branches: [main] # adjust if your default branch differs
+    branches: [main]
 
 jobs:
   redeploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Vercel Deploy Hook
+      - name: Trigger Backend Vercel Deploy Hook
         run: curl -X POST -fsSL "$VERCEL_DEPLOY_HOOK"
-    env:
-      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+
+      - name: Trigger Frontend Vercel Deploy Hook
+        run: curl -X POST -fsSL "$VERCEL_STAYSTACK_DEPLOY_HOOK"
+        env:
+          VERCEL_STAYSTACK_DEPLOY_HOOK: ${{ secrets.VERCEL_STAYSTACK_DEPLOY_HOOK }}
