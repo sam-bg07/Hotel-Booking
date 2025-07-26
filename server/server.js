@@ -26,7 +26,10 @@ app.use(
   stripeWebhook
 );
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://staystack.vercel.app",
+];
 app.use(
   cors({
     origin: (origin, callback) => {
