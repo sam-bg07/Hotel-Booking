@@ -83,7 +83,7 @@ const Dashboard = () => {
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking._id} className="border-t hover:bg-gray-50">
-                <td className="px-6 py-4">{booking.user.username}</td>
+                <td className="px-6 py-4">{booking.user.name}</td>
                 <td className="px-6 py-4">{booking.room.roomType}</td>
                 <td className="px-6 py-4">
                   {currency}
@@ -115,7 +115,7 @@ const Dashboard = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-semibold text-gray-800">
-                {booking.room.hotel.name} - {booking.room.title}
+                {booking.hotel.hotelName} - {booking.room.roomType}
               </h3>
               <span
                 className={`text-xs font-medium px-3 py-1 rounded-full ${
@@ -132,7 +132,7 @@ const Dashboard = () => {
             <div className="text-sm text-gray-600 space-y-1">
               <p>
                 <span className="font-medium text-gray-500">User:</span>{" "}
-                {booking.user.username}
+                {booking.user.firstName + " " + booking.user.lastName}
               </p>
               <p>
                 <span className="font-medium text-gray-500">Amount:</span> $

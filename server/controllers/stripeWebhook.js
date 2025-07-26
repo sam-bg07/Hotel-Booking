@@ -4,24 +4,16 @@ import Booking from "../models/Booking.js";
 // api to handle stripe payment
 
 export const stripeWebhook = async (req, res) => {
-  console.log("✅ stripeWebhook route hit");
-  console.log("Headers:", req.headers);
-  console.log("Raw body type:", typeof req.body);
-  console.log("Raw body value:", req.body);
-  console.log("Raw body length:", req.rawBody ? req.rawBody.length : "undefined");
   const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
   const signature = req.headers["stripe-signature"];
   let event;
 
   try {
-    console.log("Received webhook event:", req.body);
-    console.log("webhook event:", signature);
     event = stripeInstance.webhooks.constructEvent(
       req.body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    console.log("Webhook event received:", event.type);
   } catch (error) {
     console.error("Webhook signature error:", error.message);
     return res.status(400).send(`Webhook Error: ${error.message}`);
@@ -31,7 +23,6 @@ export const stripeWebhook = async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const bookingId = session.metadata?.bookingId;
-    console.log("Booking ID from session metadata:", bookingId);
 
     if (!bookingId) {
       console.error("No bookingId found in session metadata");
@@ -43,8 +34,6 @@ export const stripeWebhook = async (req, res) => {
         isPaid: true,
         paymentMethod: "Stripe",
       });
-
-      console.log("Booking updated as paid:", bookingId);
     } catch (err) {
       console.error("Failed to update booking:", err.message);
     }

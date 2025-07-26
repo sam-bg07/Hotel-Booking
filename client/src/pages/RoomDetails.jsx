@@ -19,10 +19,11 @@ import {
   Users,
   SearchIcon,
 } from "lucide-react";
+import Loading from "../components/Loading.jsx";
 
 const RoomDetails = () => {
   const { id } = useParams();
-  const { getToken, navigate, rooms } = UseAppContext();
+  const { getToken, navigate, rooms, isLoadingrooms } = UseAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [checkInDate, setCheckInDate] = useState(null);
@@ -65,13 +66,15 @@ const RoomDetails = () => {
     "Guests will be allocated on the ground floor according to availability. You get a comfortable Two bedroom apartment that has a true city feeling. The price quoted is for two guests; please mark the number of guests to get the exact price for groups. The Guests will be allocated ground floor according to availability. You get the comfortable two bedroom apartment that has a true city feeling.";
 
   useEffect(() => {
-    const room = rooms.find((room) => room._id === id);
-    if (!room) {
-      console.error("Room not found");
-      return;
-    }
-    room && setRoom(room);
-    room && setMainImage(room.images[0]);
+    const fetchRoomDetails = async () => {
+      const room = await rooms.find((room) => room._id === id);
+      if (!room) {
+        return;
+      }
+      (await room) && setRoom(room);
+      (await room) && setMainImage(room.images[0]);
+    };
+    fetchRoomDetails();
   }, [rooms, id]);
 
   const {
@@ -176,6 +179,13 @@ const RoomDetails = () => {
       toast.error("Error while booking");
     }
   };
+
+  if (isLoadingrooms)
+    return (
+      <div>
+        <Loading message="Loading room details..." />
+      </div>
+    );
 
   return (
     room && (
@@ -369,7 +379,7 @@ const RoomDetails = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="w-full md:w-auto flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-md text-sm font-medium transition cursor-pointer"
+              className="w-full md:w-auto flex justify-center items-center gap-2 bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-md text-sm font-medium transition cursor-pointer"
             >
               <SearchIcon className="w-4 h-4" />
               {isAvailable

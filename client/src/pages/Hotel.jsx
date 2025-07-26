@@ -2,8 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { UseAppContext } from "../context/AppContext";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { useForm } from "react-hook-form";
-import Loader from "../components/Loader";
 
 import {
   Star,
@@ -14,21 +12,23 @@ import {
   ConciergeBell,
   Waves,
 } from "lucide-react";
+import Loading from "../components/Loading";
 
 const useQuery = () => new URLSearchParams(useLocation().search);
 
 const Hotel = () => {
-  const { currency, navigate, rooms, getToken } = UseAppContext();
+  const { currency, navigate, rooms, getToken, isLoadingrooms } =
+    UseAppContext();
 
   const [room, setRoom] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const query = useQuery();
   const destination = query.get("destination");
   const fetchData = async () => {
-    setIsLoading(true);
     try {
       let res;
       if (destination) {
+        setIsLoading(true);
         // Search: Get filtered hotels/rooms by destination
         res = await axios.get(`/api/hotels?destination=${destination}`, {
           headers: {
@@ -36,13 +36,14 @@ const Hotel = () => {
           },
         });
         setRoom(res.data.rooms || []); // assuming response has "hotels"
+        setIsLoading(false);
       } else {
         setRoom(rooms); // Use rooms from context if no destination
+        setIsLoading(false);
       }
     } catch (err) {
       console.error("Error fetching data:", err.message);
-    } finally {
-      setIsLoading(false); // Set loading to false after fetching
+      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -148,13 +149,13 @@ const Hotel = () => {
     setClickShow(!clickShow);
   };
 
-  if (isLoading) return <Loader />;
+  if (isLoadingrooms) return <Loading message={"Loading rooms..."} />;
 
   return (
-    <div className="mt-40 px-6 md:px-16 lg:px-20 xl:px-28 flex  max-lg:flex-col-reverse ">
+    <div className="mt-20 md:mt-40 px-6 md:px-16 lg:px-20 xl:px-28 flex  max-lg:flex-col-reverse ">
       <div className="flex-1">
         <div className="flex flex-col items-start text-left ">
-          <h1 className="text-4xl  font-stretch-150%  max-sm:mx-6">
+          <h1 className="text-4xl mt-5 md:mt-0 font-stretch-150%  max-sm:mx-6">
             Hotel Rooms
           </h1>
           <p className="text-gray-600 mt-5   max-sm:mx-4 max-w-180 ">
@@ -167,7 +168,14 @@ const Hotel = () => {
           </p>
         </div>
 
-        {filteredAndSortedRooms.length === 0 ? (
+        {room.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <p className="text-gray-500 text-lg mb-4">No room is found</p>
+          </div>
+        ) : filteredAndSortedRooms.length === 0 &&
+          (selectedRoomTypes.length > 0 ||
+            selectedPriceRanges.length > 0 ||
+            sortBy) ? (
           <div className="flex flex-col items-center justify-center py-16">
             <p className="text-gray-500 text-lg mb-4">
               No rooms found matching your filters

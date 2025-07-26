@@ -20,6 +20,7 @@ export const AppProvider = ({ children }) => {
 
   const [isOwner, setIsOwner] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isLoadingrooms, setIsLoadingRooms] = useState(true);
   const [showHotelReg, setShowHotelReg] = useState(false);
   const [rooms, setRooms] = useState([]);
 
@@ -27,6 +28,7 @@ export const AppProvider = ({ children }) => {
 
   const fetchRooms = async () => {
     try {
+      setIsLoadingRooms(true);
       const token = await getToken();
       if (!token) {
         toast.error("You are not logged in");
@@ -39,11 +41,15 @@ export const AppProvider = ({ children }) => {
       });
       if (data.success) {
         setRooms(data.rooms);
+        setIsLoadingRooms(false);
       } else {
         toast.error("Failed to fetch rooms");
+        setIsLoadingRooms(false);
       }
     } catch (error) {
       toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsLoadingRooms(false); // Ensure loading state is reset
     }
   };
 
@@ -99,6 +105,8 @@ export const AppProvider = ({ children }) => {
     isLoadingUser,
     rooms,
     setRooms,
+    isLoadingrooms,
+    setIsLoadingRooms,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

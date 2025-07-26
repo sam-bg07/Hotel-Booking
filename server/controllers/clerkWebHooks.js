@@ -18,7 +18,7 @@ export const clerkWebhookSecret = async (req, res) => {
 
     const { data, type } = payload;
 
-    console.log("Webhook event received:", type);
+    // console.log("Webhook event received:", type);
 
     if (type === "user.created") {
       const user = new User({
@@ -32,7 +32,7 @@ export const clerkWebhookSecret = async (req, res) => {
       });
 
       await user.save();
-      console.log("User created:", user);
+      // console.log("User created:", user);
     } else if (type === "user.updated") {
       await User.findByIdAndUpdate(
         data.id,
@@ -46,10 +46,10 @@ export const clerkWebhookSecret = async (req, res) => {
         },
         { new: true }
       );
-      console.log("User updated:", data.id);
+      // console.log("User updated:", data.id);
     } else if (type === "user.deleted") {
       await User.findByIdAndDelete(data.id);
-      console.log("User deleted:", data.id);
+      // console.log("User deleted:", data.id);
     }
 
     res.status(200).json({ message: "Webhook processed successfully" });

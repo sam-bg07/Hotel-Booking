@@ -104,23 +104,19 @@ const ListRoom = () => {
                     {item.price}
                   </td>
                   <td className="py-3 px-4 text-red-500 text-sm text-center border-t border-gray-300">
-                    <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
-                      <input
-                        onChange={() => toggleRoomStatus(item._id)}
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={item.isAvailable}
-                      />
-                      <div
-                        className="w-12 h-7 bg-slate-300 rounded-full peer
-                      peer-checked:bg-blue-600 transition-colors duration-200"
-                      ></div>
+                    <button
+                      type="button"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer ${
+                        item.isAvailable ? "bg-blue-600" : "bg-gray-200"
+                      }`}
+                      onClick={() => toggleRoomStatus(item._id)}
+                    >
                       <span
-                        className="dot absolute left-1 top-1 w-5 h-5 bg-white
-                      rounded-full transition-transform duration-200 ease-in-out
-                      peer-checked : translate-x-5"
-                      ></span>
-                    </label>
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          item.isAvailable ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -145,9 +141,9 @@ const ListRoom = () => {
                   </h3>
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-gray-900">
-                      ${room.pricePerNight}
+                      ${room.price}
                     </span>
-                    <span className="text-sm text-gray-500">per night</span>
+                    <span className="text-sm text-gray-500"> /night</span>
                   </div>
                 </div>
                 <div className="ml-4">
@@ -155,13 +151,13 @@ const ListRoom = () => {
                   <button
                     type="button"
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      room.isActive ? "bg-blue-600" : "bg-gray-200"
+                      room.isAvailable ? "bg-blue-600" : "bg-gray-200"
                     }`}
-                    onClick={() => toggleRoomStatus(room.id)}
+                    onClick={() => toggleRoomStatus(room._id)}
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        room.isActive ? "translate-x-6" : "translate-x-1"
+                        room.isAvailable ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
                   </button>
@@ -188,15 +184,15 @@ const ListRoom = () => {
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      room.isActive ? "bg-green-500" : "bg-gray-400"
+                      room.isAvailable ? "bg-green-500" : "bg-gray-400"
                     }`}
                   />
                   <span
                     className={`text-xs font-medium ${
-                      room.isActive ? "text-green-700" : "text-gray-500"
+                      room.isAvailable ? "text-green-700" : "text-gray-500"
                     }`}
                   >
-                    {room.isActive ? "Active" : "Inactive"}
+                    {room.isAvailable ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>

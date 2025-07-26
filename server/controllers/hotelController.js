@@ -33,7 +33,7 @@ export const hotelController = async (req, res) => {
 export const getAllHotels = async (req, res) => {
   try {
     const destination = req.query.destination;
-    console.log("Searching for hotels in:", destination);
+    // console.log("Searching for hotels in:", destination);
 
     // Step 1: Find hotels matching destination in address
     const hotels = await Hotel.find({
