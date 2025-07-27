@@ -5,7 +5,6 @@ import { useClerk, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks
 import { Menu, Search, SidebarCloseIcon } from "lucide-react";
 import { UseAppContext } from "../context/AppContext.jsx";
 
-import { set } from "react-hook-form";
 import Loader from "./Loader.jsx";
 
 const Navbar = () => {
@@ -32,7 +31,11 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 10);
     };
 
-    if (location.pathname === "/") {
+    if (
+      location.pathname === "/" ||
+      location.pathname === "/experience" ||
+      location.pathname === "/about"
+    ) {
       handleScroll(); // Check scroll immediately
       window.addEventListener("scroll", handleScroll);
     } else {

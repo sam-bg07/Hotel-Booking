@@ -6,19 +6,17 @@ import { AboutMissionValues } from "../components/AboutMissionValues";
 import { AboutOurStory } from "../components/AboutOurStory";
 import { AboutOurTeam } from "../components/AboutOurTeam";
 import { AboutSustainability } from "../components/AboutSustainability";
-import { AboutCTA } from "../components/AboutCTA";
 
 const About = () => {
   return (
     <>
-      <AboutSection />
       <AboutOurStory />
+      <AboutSection />
       <AboutMissionValues />
       <AboutOurTeam />
       <AboutAwardsRecognition />
       <AboutSustainability />
       <AboutFAQ />
-      <AboutCTA />
     </>
   );
 };

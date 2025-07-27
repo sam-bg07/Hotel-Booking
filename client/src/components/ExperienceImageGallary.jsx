@@ -25,7 +25,7 @@ const ExperienceImageGallary = () => {
     },
     {
       id: 4,
-      src: "/placeholder.svg?height=300&width=500",
+      src: "/Cultural art workshop.jpeg",
       alt: "Cultural art workshop",
     },
     {

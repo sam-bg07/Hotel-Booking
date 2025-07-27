@@ -7,7 +7,7 @@ const ExperienceHeroSection = ({ onCTAClick }) => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/placeholder.svg?height=1080&width=1920"
+          src="/landing.jpeg"
           alt="Unforgettable experiences"
           className="w-full h-full object-cover"
         />

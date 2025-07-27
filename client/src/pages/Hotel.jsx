@@ -30,11 +30,7 @@ const Hotel = () => {
       if (destination) {
         setIsLoading(true);
         // Search: Get filtered hotels/rooms by destination
-        res = await axios.get(`/api/hotels?destination=${destination}`, {
-          headers: {
-            Authorization: `Bearer ${await getToken()}`,
-          },
-        });
+        res = await axios.get(`/api/hotels?destination=${destination}`);
         setRoom(res.data.rooms || []); // assuming response has "hotels"
         setIsLoading(false);
       } else {

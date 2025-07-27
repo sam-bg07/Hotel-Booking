@@ -89,8 +89,11 @@
 
 import { Hotel, ShieldCheck, MapPin } from "lucide-react";
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AboutSection = () => {
+  const navigate = useNavigate();
+
   const features = useMemo(() => [
     {
       icon: Hotel,
@@ -168,7 +171,12 @@ export const AboutSection = () => {
           <p className="text-gray-600 mb-6">
             Ready to experience the QuickStay difference?
           </p>
-          <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          <button
+            onClick={() => {
+              navigate("/hotels"), scrollTo(0, 0);
+            }}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+          >
             Start Your Journey
           </button>
         </div>

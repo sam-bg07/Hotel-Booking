@@ -1,4 +1,3 @@
-import React from "react";
 import HotelCard from "./HotelCard";
 import { UseAppContext } from "../context/AppContext";
 
@@ -8,11 +7,11 @@ const HotelCardFeatured = () => {
     rooms.length > 0 && (
       <div className="mt-20 flex flex-col items-center  text-center ">
         <p>
-          <span className="text-5xl font-stretch-500%">
+          <span className="text-4xl md:text-5xl font-stretch-500%">
             Featured Hotels And Destination
           </span>
         </p>
-        <div className="text-gray-600 mt-5 max-md:text-start max-sm:mx-4">
+        <div className="text-gray-600 text-center mt-5 max-sm:mx-4">
           From serene beaches to vibrant cities, we've got your stay covered.{" "}
           <br />
           Explore our top-rated hotels and destinations, handpicked for your
@@ -21,7 +20,7 @@ const HotelCardFeatured = () => {
         </div>
 
         {/* hotel card  */}
-        <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4  mt-20 w-full">
+        <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4 mt-10 md:mt-20 w-full">
           {rooms.map((room, index) => (
             <HotelCard key={room._id} room={room} />
           ))}

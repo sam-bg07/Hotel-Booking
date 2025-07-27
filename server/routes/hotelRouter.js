@@ -9,6 +9,6 @@ const hotelRouter = express.Router();
 
 // Middleware to check if the user is authenticated
 hotelRouter.post("/", authMiddle, hotelController);
-hotelRouter.get("/", authMiddle, getAllHotels);
+hotelRouter.get("/", getAllHotels);
 
 export default hotelRouter;
