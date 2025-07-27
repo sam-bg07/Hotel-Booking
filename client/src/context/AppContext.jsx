@@ -22,6 +22,7 @@ export const AppProvider = ({ children }) => {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoadingrooms, setIsLoadingRooms] = useState(true);
   const [showHotelReg, setShowHotelReg] = useState(false);
+  const [experience, setExperience] = useState([]);
   const [rooms, setRooms] = useState([]);
 
   const API_BASE = import.meta.env.VITE_BACKEND_URL;
@@ -29,16 +30,7 @@ export const AppProvider = ({ children }) => {
   const fetchRooms = async () => {
     try {
       setIsLoadingRooms(true);
-      const token = await getToken();
-      if (!token) {
-        toast.error("You are not logged in");
-        return;
-      }
-      const { data } = await axios.get(`${API_BASE}/api/rooms`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data } = await axios.get(`${API_BASE}/api/rooms`);
       if (data.success) {
         setRooms(data.rooms);
         setIsLoadingRooms(false);
@@ -80,6 +72,20 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const fetchexperience = async () => {
+    try {
+      const { data } = await axios.get("/api/experiences");
+
+      if (data.success) {
+        setExperience(data.experienceBookings);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUser();
@@ -91,6 +97,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     fetchRooms();
+    fetchexperience();
   }, []);
 
   const value = {
@@ -107,6 +114,8 @@ export const AppProvider = ({ children }) => {
     setRooms,
     isLoadingrooms,
     setIsLoadingRooms,
+    experience,
+    setExperience,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

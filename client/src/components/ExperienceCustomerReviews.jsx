@@ -71,29 +71,7 @@ const ExperienceCustomerReviews = () => {
       },
     },
   };
-  const { getToken } = UseAppContext();
-  const [experience, setExperience] = useState([]);
-
-  useEffect(() => {
-    const fetchexperience = async () => {
-      try {
-        const { data } = await axios.get("/api/experiences", {
-          headers: {
-            Authorization: `Bearer ${await getToken()}`,
-          },
-        });
-
-        if (data.success) {
-          setExperience(data.experienceBookings);
-        } else {
-          toast.error(data.message);
-        }
-      } catch (error) {
-        toast.error(error.message);
-      }
-    };
-    fetchexperience();
-  }, []);
+  const { getToken, experience, setExperience } = UseAppContext();
 
   return (
     <ExperienceAnimatedSection className="py-16 px-4 bg-gray-50">

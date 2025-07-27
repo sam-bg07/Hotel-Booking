@@ -1,9 +1,9 @@
-import React from "react";
-import { testimonials } from "../assets/assets";
 import { MessageSquare, Star } from "lucide-react";
+import { UseAppContext } from "../context/AppContext";
 
 const GuestCard = () => {
-  const rating = 4;
+  const { experience, setExperience } = UseAppContext();
+
   return (
     <div className=" my-20 flex flex-col items-center justify-center">
       <span className="text-4xl font-stretch-500% text-center max-sm:mx-6">
@@ -13,13 +13,10 @@ const GuestCard = () => {
         Experience the reason seasoned travelers return to QuickStay: curated
         luxury, seamless stays, and distinguished service worldwide.
       </p>
-
-      {/* { id: 1, name: "Emma Rodriguez", address: "Barcelona, Spain", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200", rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that QuickStay provides." }, */}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-6 md:px-16 lg:px-24 mt-20 w-full">
-        {testimonials.map((data, index) => (
+        {experience.map((data, index) => (
           <div
-            key={data.id}
+            key={data._id}
             className="bg-white group p-6 rounded-xl relative shadow-[0_4px_6px_rgba(0,0,0,0.3),_0_1px_3px_rgba(255,255,255,0.1)]
             hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),_0_10px_10px_-5px_rgba(0,0,0,0.04)] 
                      hover:-translate-y-2 hover:scale-[1.02] 
@@ -37,7 +34,7 @@ const GuestCard = () => {
             <div className="flex items-center gap-4 mb-4">
               <div className="relative">
                 <img
-                  src={data.image}
+                  src={data.bookingId?.user?.image}
                   alt={data.name}
                   className="w-12 h-12 rounded-full object-cover group-hover:scale-110 
                            transition-transform duration-300 ease-in-out
@@ -53,10 +50,11 @@ const GuestCard = () => {
                   className="font-semibold text-xl text-gray-800 group-hover:text-orange-700 
                              transition-colors duration-300"
                 >
-                  {data.name}
+                  {data.fullName}
                 </h3>
                 <p className="text-gray-500 text-sm group-hover:text-gray-600 transition-colors duration-300">
-                  {data.address}
+                  {data.bookingId?.hotel.address || "Unknown address"},{" "}
+                  {data.bookingId?.hotel.city || "Unknown city"}
                 </p>
               </div>
             </div>
@@ -82,7 +80,7 @@ const GuestCard = () => {
 
             {/* Review Text */}
             <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300 ease-in-out">
-              {data.review}
+              {data.feedback}
             </p>
             <div
               className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-400/0 via-orange-400/0 to-orange-400/0 
