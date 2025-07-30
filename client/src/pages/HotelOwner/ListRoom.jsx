@@ -35,6 +35,12 @@ const ListRoom = () => {
   // };
 
   const toggleRoomStatus = async (roomId) => {
+    // Optimistically update UI
+    const updatedRooms = rooms.map((room) =>
+      room._id === roomId ? { ...room, isAvailable: !room.isAvailable } : room
+    );
+    setRooms(updatedRooms);
+
     try {
       const { data } = await axios.post(
         `/api/rooms/toggle-availability/${roomId}`,
@@ -48,12 +54,17 @@ const ListRoom = () => {
 
       if (data.success) {
         toast.success("Room availability toggled successfully");
-        fetchRooms(); // Refresh the room list after toggling
+        // Optionally refresh rooms from server to sync state
+        // await fetchRooms();
       } else {
         toast.error(data.message);
+        // Revert UI update on failure
+        setRooms(rooms);
       }
     } catch (error) {
       toast.error(error.message);
+      // Revert UI update on error
+      setRooms(rooms);
     }
   };
 

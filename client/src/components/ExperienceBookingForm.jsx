@@ -90,13 +90,13 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
         ...formData,
         bookingId: latestBooking._id,
       };
-
+      console.log("Submitting experience booking:", payload);
       const { data } = await axios.post("/api/experiences", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      console.log("Experience booking response:", data);
       if (data.success) {
         toast.success(data.message);
         reset();

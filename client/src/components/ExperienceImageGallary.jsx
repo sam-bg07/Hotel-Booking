@@ -10,17 +10,17 @@ const ExperienceImageGallary = () => {
   const galleryImages = [
     {
       id: 1,
-      src: "/placeholder.svg?height=300&width=400",
+      src: "/Sunset-Sea-View-Room.jpg",
       alt: "Sunset trekking adventure",
     },
     {
       id: 2,
-      src: "/placeholder.svg?height=400&width=300",
+      src: "/Luxury spa treatment.jpg",
       alt: "Luxury spa treatment",
     },
     {
       id: 3,
-      src: "/placeholder.svg?height=350&width=350",
+      src: "/Gourmet dining experience.jpg",
       alt: "Gourmet dining experience",
     },
     {
@@ -30,12 +30,12 @@ const ExperienceImageGallary = () => {
     },
     {
       id: 5,
-      src: "/placeholder.svg?height=400&width=400",
+      src: "/Family enjoying activities.avif",
       alt: "Family enjoying activities",
     },
     {
       id: 6,
-      src: "/placeholder.svg?height=300&width=300",
+      src: "/Mountain sunset view.jpg",
       alt: "Mountain sunset view",
     },
   ];

@@ -6,6 +6,7 @@ export const createExperienceBooking = async (req, res) => {
   try {
     const { bookingId } = req.body;
 
+    console.log("Creating experience booking for bookingId:", bookingId);
     // 1. Validate bookingId
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return res.status(400).json({
@@ -13,6 +14,7 @@ export const createExperienceBooking = async (req, res) => {
         message: "Invalid booking ID",
       });
     }
+    console.log("Valid bookingId:", bookingId);
 
     // 2. Check if booking exists
     const booking = await Booking.findById(bookingId);
@@ -22,6 +24,7 @@ export const createExperienceBooking = async (req, res) => {
         success: false,
       });
     }
+    console.log("Booking exists:", booking);
 
     // 3. Prevent duplicate experience bookings
     const alreadyBooked = await Experience.findOne({ bookingId: bookingId });
@@ -31,6 +34,7 @@ export const createExperienceBooking = async (req, res) => {
         success: false,
       });
     }
+    console.log("No duplicate experience booking found");
 
     // 4. Create the experience
     const experienceBooking = await Experience.create(req.body);
