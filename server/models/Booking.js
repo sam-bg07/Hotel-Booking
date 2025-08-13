@@ -17,6 +17,11 @@ const BookingSchema = new mongoose.Schema(
       ref: "Room",
       required: true,
     },
+    coupon: {
+      type: String,
+      ref: "Coupon",
+      required: false,
+    },
     checkInDate: {
       type: Date,
       required: true,
@@ -25,9 +30,17 @@ const BookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    totalPrice: {
+    originalPrice: {
       type: Number,
       required: true,
+    },
+    discountedPrice: {
+      type: Number,
+      default: 0,
+    },
+    isdiscounted: {
+      type: Boolean,
+      default: false,
     },
     guests: {
       type: Number,

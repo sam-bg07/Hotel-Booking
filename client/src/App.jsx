@@ -1,4 +1,3 @@
-import React from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import { Routes, Route } from "react-router-dom";
@@ -17,6 +16,8 @@ import ListRoom from "./pages/HotelOwner/ListRoom";
 import { UseAppContext } from "./context/AppContext";
 import { Toaster } from "react-hot-toast";
 import Loader from "./components/Loader";
+import AddCouponPage from "./pages/HotelOwner/AddCoupon";
+import CouponList from "./pages/HotelOwner/ListCoupon";
 const App = () => {
   const location = useLocation();
   const isOwnerRoute = location.pathname.includes("/owner");
@@ -39,6 +40,8 @@ const App = () => {
           <Route index element={<Dashboard />} />
           <Route path="add-room" element={<AddRoom />} />
           <Route path="list-room" element={<ListRoom />} />
+          <Route path="addcoupon" element={<AddCouponPage />} />
+          <Route path="listcoupon" element={<CouponList />} />
           {/* Add more owner routes as needed */}
         </Route>
         {/* Add more routes as needed */}

@@ -3,16 +3,19 @@ import { CalendarCheck, DollarSign, CreditCard } from "lucide-react";
 import axios from "axios";
 import { UseAppContext } from "../../context/AppContext.jsx";
 import { toast } from "react-hot-toast";
+import Loading from "../../components/Loading.jsx";
 
 const Dashboard = () => {
   const { currency, getToken, user } = UseAppContext();
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch data from the server
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get("/api/bookings/hotel", {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
@@ -22,11 +25,14 @@ const Dashboard = () => {
         setTotalBookings(data.dashboardData.totalBookings);
         setTotalRevenue(data.dashboardData.totalRevenue);
         setBookings(data.dashboardData.bookings);
+        setLoading(false);
       } else {
         toast.error(data.message || "Failed to fetch dashboard data");
+        setLoading(false);
       }
     } catch (error) {
       toast.error(error.message);
+      setLoading(false);
     }
   };
 
@@ -35,8 +41,11 @@ const Dashboard = () => {
       fetchDashboardData();
     }
   }, [user]);
+
+  if (loading) return <Loading />;
+
   return (
-    <div className="w-full  mt-20 px-6 md:px-12 lg:px-20 py-10 z-30 max-md:mt-30">
+    <div className="w-full  mt-20 px-6 md:px-12 min-h-screen lg:px-20 py-10 z-30 max-md:mt-30">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
       <p className="text-gray-500 mb-8 max-w-xl">
         Monitor your room listings, track bookings and analyze revenue—all in
@@ -83,11 +92,13 @@ const Dashboard = () => {
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking._id} className="border-t hover:bg-gray-50">
-                <td className="px-6 py-4">{booking.user.name}</td>
+                <td className="px-6 py-4">
+                  {booking.user.firstName + " " + booking.user.lastName}
+                </td>
                 <td className="px-6 py-4">{booking.room.roomType}</td>
                 <td className="px-6 py-4">
                   {currency}
-                  {booking.totalPrice}
+                  {booking.originalPrice}
                 </td>
                 <td className="px-6 py-4">
                   {booking.isPaid ? (
@@ -136,7 +147,7 @@ const Dashboard = () => {
               </p>
               <p>
                 <span className="font-medium text-gray-500">Amount:</span> $
-                {booking.totalPrice}
+                {booking.originalPrice}
               </p>
               <p>
                 <span className="font-medium text-gray-500">Check-in:</span>{" "}

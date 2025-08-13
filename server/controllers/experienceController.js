@@ -61,6 +61,7 @@ export const getExperienceBookings = async (req, res) => {
         populate: [{ path: "hotel" }, { path: "user" }],
       })
       .sort({ rating: -1, createdAt: -1 });
+    console.log("Fetched experience bookings:", experienceBookings);
     res.status(200).json({
       success: true,
       experienceBookings,

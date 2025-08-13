@@ -7,12 +7,15 @@ import {
   User,
   Menu,
   X,
+  PlusCircle,
 } from "lucide-react";
 
 const sidebarLinks = [
   { name: "Dashboard", path: "/owner", icon: LayoutDashboard },
   { name: "Add Room", path: "/owner/add-room", icon: PlusSquare },
   { name: "List Room", path: "/owner/list-room", icon: ListOrdered },
+  { name: "Add Coupon", path: "/owner/addcoupon", icon: PlusCircle },
+  { name: "List Coupon", path: "/owner/listcoupon", icon: ListOrdered },
   { name: "Profile", path: "/owner/profile", icon: User },
 ];
 
@@ -76,7 +79,7 @@ const Sidebar = () => {
       </div>
 
       {/* 🖥️ Desktop Sidebar - md and above */}
-      <div className="md:block max-md:hidden w-64 h-screen pt-25 border-r border-gray-300 shadow-md flex flex-col transition-all duration-300 ">
+      <div className="md:block max-md:hidden w-55 pt-25 border-r border-gray-300 shadow-md flex flex-col transition-all duration-300 ">
         <nav className="flex flex-row md:flex-col gap-4 md:gap-2 overflow-x-auto md:overflow-visible">
           {sidebarLinks.map((link) => (
             <NavLink

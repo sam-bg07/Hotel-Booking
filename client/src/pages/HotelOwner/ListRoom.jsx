@@ -3,13 +3,16 @@ import { UseAppContext } from "../../context/AppContext";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+import Loading from "../../components/Loading";
 
 const ListRoom = () => {
   const [rooms, setRooms] = useState([]);
   const { getToken, user } = UseAppContext();
+  const [loading, setLoading] = useState(true);
 
   const fetchRooms = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get("/api/rooms/hotel", {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
@@ -19,11 +22,14 @@ const ListRoom = () => {
 
       if (data.success) {
         setRooms(data.rooms);
+        setLoading(false);
       } else {
         toast.error(data.message);
+        setLoading(false);
       }
     } catch (error) {
       toast.error(error.message);
+      setLoading(false);
     }
   };
   // const toggleRoomStatus = (id) => {
@@ -73,8 +79,11 @@ const ListRoom = () => {
       fetchRooms();
     }
   }, [user]);
+
+  if (loading) return <Loading />;
+
   return (
-    <div className="w-full  mt-20 px-6 md:px-12 lg:px-20 py-10 z-30 max-md:mt-30">
+    <div className="w-full  mt-20 px-6 md:px-12 min-h-screen lg:px-20 py-10 z-30 max-md:mt-30">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List of Rooms</h1>
       <p className="text-gray-500 mb-8 max-w-xl">
         Monitor your room listings, track bookings and analyze revenue—all in

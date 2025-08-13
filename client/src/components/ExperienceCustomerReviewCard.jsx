@@ -11,6 +11,8 @@ const ExperienceCustomerReviewCard = ({ review }) => {
     });
   };
 
+  console.log(review);
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star

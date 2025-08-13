@@ -9,18 +9,6 @@ const HotelCard = ({ room, index }) => {
 
   // Handle case where room data is not available
   return (
-    // {
-    //     "_id": "67f763d8197ac559e4089b7a",
-    //     "hotel": hotelDummyData,
-    //     "roomType": "Single Bed",
-    //     "pricePerNight": 199,
-    //     "amenities": ["Free WiFi", "Room Service", "Pool Access"],
-    //     "images": [roomImg4, roomImg1, roomImg2, roomImg3],
-    //     "isAvailable": true,
-    //     "createdAt": "2025-04-10T06:23:20.252Z",
-    //     "updatedAt": "2025-04-10T06:23:20.252Z",
-    //     "__v": 0
-    // }
     <NavLink
       to={`/hotels/${room._id}`}
       onMouseEnter={() => setHoveredCard(room._id)}
@@ -33,7 +21,7 @@ const HotelCard = ({ room, index }) => {
       <img
         src={room?.images[0]}
         alt="firstImage"
-        className="rounded-t-xl   h-[50%]"
+        className="rounded-t-xl min-h-[200px]"
       />
       <p className=" absolute  top-0 left-0 m-2 px-2 py-1 text-white bg-black/60 text-sm rounded">
         Best Seller

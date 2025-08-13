@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { UseAppContext } from "../context/AppContext.jsx";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -21,12 +21,16 @@ import {
 } from "lucide-react";
 import Loading from "../components/Loading.jsx";
 
+const useQuery = () => new URLSearchParams(useLocation().search);
+
 const RoomDetails = () => {
   const { id } = useParams();
   const { getToken, navigate, rooms, isLoadingrooms } = UseAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [checkInDate, setCheckInDate] = useState(null);
+  const query = useQuery();
+  const couponId = query.get("couponId");
 
   const [isChecking, setIsChecking] = useState(false);
 
@@ -155,6 +159,7 @@ const RoomDetails = () => {
           checkInDate: data.checkInDate,
           checkOutDate: data.checkOutDate,
           guests: data.guests,
+          coupon: couponId || null,
           totalPrice: room.price,
           hotel: room.hotel._id,
           paymentMethod: "Cash (At Hotel)",
@@ -229,7 +234,7 @@ const RoomDetails = () => {
             <img
               src={mainImage}
               alt="Main room"
-              className="w-full mt-6 md:mt-10 lg:mt-0 mx-auto rounded-xl shadow-xl object-cover max-h-[500px]"
+              className="w-full min-h-[270px] mt-6 md:mt-10 lg:mt-0 mx-auto rounded-xl shadow-xl object-cover max-h-[500px]"
             />
           </div>
 

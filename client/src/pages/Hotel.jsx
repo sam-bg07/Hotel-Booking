@@ -24,6 +24,8 @@ const Hotel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const query = useQuery();
   const destination = query.get("destination");
+  const couponId = query.get("couponId");
+
   const fetchData = async () => {
     try {
       let res;
@@ -192,7 +194,13 @@ const Hotel = () => {
               <div className=" flex flex-col md:flex-row gap-5 max-w-full ">
                 {/* Image */}
                 <img
-                  onClick={() => navigate(`/hotels/${room._id}`)}
+                  onClick={() => {
+                    if (couponId) {
+                      navigate(`/hotels/${room._id}?couponId=${couponId}`);
+                    } else {
+                      navigate(`/hotels/${room._id}`);
+                    }
+                  }}
                   src={room.images[2]}
                   alt="hotel-image"
                   className="w-full md:w-[50%] h-65 rounded-xl object-cover cursor-pointer hover:scale-105 transition-transform duration-300"

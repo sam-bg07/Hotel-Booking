@@ -1,10 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { exclusiveOffers } from "../assets/assets";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { MoveRightIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const ExclusiveOffer = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [coupons, setCoupons] = useState([]);
+
+  const navigate = useNavigate();
+
+  const fetch3coupons = async () => {
+    try {
+      const { data } = await axios.get("/api/coupon/get3coupons");
+
+      if (data.success) {
+        setCoupons(data.coupons);
+        console.log(data.coupons);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetch3coupons();
+  }, []);
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="bg-gray-50 mt-10 flex flex-col items-center  text-center py-16">
@@ -22,10 +55,10 @@ const ExclusiveOffer = () => {
       </div>
 
       <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4  mt-20 w-full group ">
-        {exclusiveOffers.map((offer, index) => (
+        {coupons.map((offer, index) => (
           <NavLink
             key={offer._id}
-            to={`/exclusive-offer/${offer._id}`}
+            to={`/hotels?couponId=${offer._id}`}
             onMouseEnter={() => setHoveredCard(offer._id)}
             onMouseLeave={() => setHoveredCard(null)}
             className={` ${
@@ -34,11 +67,11 @@ const ExclusiveOffer = () => {
                 : "opacity-100"
             } max-w-100 flex relative rounded-xl overflow-hidden hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
           >
-            <img src={offer?.image} alt="firstImage" />
+            <img src="landing.jpeg" alt="firstImage" />
             <div className="absolute inset-0  flex  justify-between items-start flex-col p-4 text-white">
               {/* Discount Badge */}
               <span className="bg-gray-900/80 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full self-start">
-                <span className="font-bold">{offer.priceOff}%</span> OFF
+                <span className="font-bold">{offer.discountValue}%</span> OFF
               </span>
 
               {/* Bottom Text (you can customize further) */}
@@ -48,11 +81,13 @@ const ExclusiveOffer = () => {
                   {offer.description}
                 </p>
                 <p className="text-xs text-sky-300 mt-1.5">
-                  Expires {offer.expiryDate}
+                  Expires on {formatDate(offer.validUntil)}
                 </p>
               </div>
               <div className="flex gap-2 items-center justify-center">
-                <span className=" inline-block font-semibold ">View Offer</span>
+                <span className=" inline-block font-semibold ">
+                  Use Coupons
+                </span>
                 <MoveRightIcon
                   className={`${
                     hoveredCard && hoveredCard !== offer._id

@@ -1,8 +1,10 @@
 import Booking from "../models/Booking.js";
 import Room from "../models/Room.js";
 import Hotel from "../models/Hotel.js";
+import User from "../models/User.js";
 import transporter from "../config/nodeMailer.js";
 import stripe from "stripe";
+import Coupon from "../models/Coupon.js";
 
 const checkAvailability = async ({ room, checkInDate, checkOutDate }) => {
   try {
@@ -49,7 +51,14 @@ export const checkAvailabilityAPI = async (req, res) => {
 //api to create booking
 export const createBooking = async (req, res) => {
   try {
-    const { room, checkInDate, checkOutDate, totalPrice, guests } = req.body;
+    const {
+      room,
+      checkInDate,
+      checkOutDate,
+      totalPrice,
+      guests,
+      coupon: couponId,
+    } = req.body;
     const isAvailable = await checkAvailability({
       room,
       checkInDate,
@@ -78,17 +87,49 @@ export const createBooking = async (req, res) => {
     const nights = Math.ceil(timeDiffernce / (1000 * 3600 * 24));
 
     totalAmount = totalAmount * nights;
-    const booking = await Booking.create({
-      user: req.user._id,
-      hotel: roomData.hotel,
-      room: room,
-      checkInDate: checkIn,
-      checkOutDate: checkOut,
-      totalPrice: totalAmount,
-      guests: +guests,
-      paymentMethod: "Cash",
-      isPaid: false,
-    });
+    const totalAmount2 = totalAmount * nights;
+    console.log("Total amount:", totalAmount);
+    let booking;
+    if (couponId) {
+      const coupon = await Coupon.findById(couponId);
+      console.log("Coupon:", coupon);
+      const discount = (totalAmount * coupon.discountValue) / 100;
+      console.log("Discount:", discount, coupon.discountValue);
+      totalAmount -= discount;
+      console.log("Discounted amount:", totalAmount);
+      booking = await Booking.create({
+        user: req.user._id,
+        hotel: roomData.hotel,
+        room: room,
+        coupon: couponId,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        originalPrice: totalAmount2,
+        discountedPrice: totalAmount,
+        isdiscounted: true,
+        guests: +guests,
+        paymentMethod: "Cash",
+        isPaid: false,
+      });
+      const updatedCoupon = await Coupon.findByIdAndUpdate(
+        coupon._id,
+        { $set: { redeemedCount: coupon.redeemedCount + 1 } },
+        { new: true }
+      );
+    } else {
+      booking = await Booking.create({
+        user: req.user._id,
+        hotel: roomData.hotel,
+        room: room,
+        coupon: couponId,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        originalPrice: totalAmount2,
+        guests: +guests,
+        paymentMethod: "Cash",
+        isPaid: false,
+      });
+    }
 
     const roomData1 = await Room.findById(room).populate("hotel");
 
@@ -142,8 +183,12 @@ export const getAllBookingsByUser = async (req, res) => {
   try {
     const userID = req.user._id;
     const bookings = await Booking.find({ user: userID })
-      .populate("room")
-      .populate("hotel")
+      .populate([
+        { path: "room" },
+        { path: "hotel" },
+        { path: "user" },
+        { path: "coupon" },
+      ])
       .sort({ createdAt: -1 });
     res.json({ success: true, bookings });
   } catch (error) {
@@ -173,7 +218,7 @@ export const getAllBookingsByHotel = async (req, res) => {
     //   });
     // }
     const totalRevenue = bookings.reduce(
-      (acc, booking) => acc + booking.totalPrice,
+      (acc, booking) => acc + booking.originalPrice,
       0
     );
     res.json({
@@ -187,14 +232,18 @@ export const getAllBookingsByHotel = async (req, res) => {
 
 export const stripePayment = async (req, res) => {
   try {
-    const { bookingId } = req.body;
+    const { bookingId, finalPrice } = req.body;
     // console.log("Booking ID:", bookingId);
     const booking = await Booking.findById(bookingId);
     const roomData = await Room.findById(booking.room);
     if (!booking || !roomData) {
       return res.json({ success: false, message: "Booking or room not found" });
     }
-    const totalAmount = booking.totalPrice;
+    // Use finalPrice if provided, otherwise use original booking price
+    const totalAmount =
+      finalPrice !== undefined && finalPrice !== null
+        ? finalPrice
+        : booking.totalPrice;
     // console.log("Total Amount:", totalAmount);
     const { origin } = req.headers;
 

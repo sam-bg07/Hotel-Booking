@@ -80,7 +80,7 @@ const AddRoomForm = () => {
   };
 
   return (
-    <div className="w-full  mt-20 px-6 md:px-12 py-10 max-md:mt-30">
+    <div className="w-full mt-20 px-6 min-h-screen md:px-12 py-10 max-md:mt-30">
       <h1 className="text-4xl font-bold text-gray-800 mb-2 font-Poppins">
         Add Your Room
       </h1>
