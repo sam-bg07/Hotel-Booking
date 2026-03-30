@@ -36,6 +36,7 @@ const App = () => {
         <Route path="/my-booking" element={<MyBooking />} />
         <Route path="/loader/:nextUrl" element={<Loader />} />
 
+
         <Route path="/owner/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="add-room" element={<AddRoom />} />
