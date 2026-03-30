@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Backend Vercel Deploy Hook
-        run: curl -X POST -fsSL "$VERCEL_DEPLOY_HOOK"
+        run: curl -X POST -fsSL "$BACKEND_HOOK"
         env:
-          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          BACKEND_HOOK: ${{ secrets.BACKEND_HOOK }}
 
       - name: Trigger Frontend Vercel Deploy Hook
-        run: curl -X POST -fsSL "$VERCEL_STAYSTACK_DEPLOY_HOOK"
+        run: curl -X POST -fsSL "$FRONTEND_HOOK"
         env:
-          VERCEL_STAYSTACK_DEPLOY_HOOK: ${{ secrets.VERCEL_STAYSTACK_DEPLOY_HOOK }}
+          FRONTEND_HOOK: ${{ secrets.FRONTEND_HOOK }}
