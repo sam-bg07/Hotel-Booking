@@ -79,6 +79,12 @@ app.use("/api/experiences", experienceRouter);
 app.use("/api/coupon", couponRouter);
 app.use("/api/agent", agentRoutes);
 
-app.listen(PORT, () => {
-  logger.info(`Server is running on http://localhost:${PORT}`);
-});
+// Do not listen strictly on Vercel unless in a dev environment
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    logger.info(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+// Ensure the Express app is exported so Vercel Serverless Functions can consume it
+export default app;
