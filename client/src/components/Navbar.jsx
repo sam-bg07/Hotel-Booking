@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useMemo, useCallback } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets.js"; // Adjust the import path as necessary
 import { useClerk, UserButton } from "@clerk/clerk-react"; // Import Clerk hooks for authentication
@@ -7,7 +7,7 @@ import { UseAppContext } from "../context/AppContext.jsx";
 
 import Loader from "./Loader.jsx";
 
-const Navbar = () => {
+const Navbar = memo(() => {
   // const { user, navigate, isOwner, setShowHotelReg } = UseAppContext();
   const context = UseAppContext();
 
@@ -16,12 +16,15 @@ const Navbar = () => {
   const { user, navigate, isOwner, setShowHotelReg, isLoadingUser } = context;
   const { openSignIn } = useClerk();
   const location = useLocation();
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Hotels", path: "/hotels" },
-    { name: "Experience", path: "/experience" },
-    { name: "About", path: "/about" },
-  ];
+  const navLinks = useMemo(
+    () => [
+      { name: "Home", path: "/" },
+      { name: "Hotels", path: "/hotels" },
+      { name: "Experience", path: "/experience" },
+      { name: "About", path: "/about" },
+    ],
+    [],
+  );
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -239,6 +242,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+});
 
 export default Navbar;

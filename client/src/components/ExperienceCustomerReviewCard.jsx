@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import { motion } from "framer-motion";
 import { Calendar, MessageSquare, Star, Quote } from "lucide-react";
 
@@ -11,7 +12,7 @@ const ExperienceCustomerReviewCard = ({ review }) => {
     });
   };
 
-  console.log(review);
+  logger.info(review);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (

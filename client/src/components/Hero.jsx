@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { UseAppContext } from "../context/AppContext";
@@ -33,7 +34,7 @@ const Hero = () => {
 
     reset();
 
-    console.log("Search submitted:", {
+    logger.info("Search submitted:", {
       destination,
       checkIn,
       checkOut,

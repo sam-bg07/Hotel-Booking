@@ -61,8 +61,15 @@ const BookingSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+// Indexes to speed up queries
+BookingSchema.index({ user: 1 });
+BookingSchema.index({ hotel: 1 });
+BookingSchema.index({ room: 1 });
+BookingSchema.index({ status: 1 });
+BookingSchema.index({ checkInDate: 1, checkOutDate: 1 });
 
 const Booking = mongoose.model("Booking", BookingSchema);
 export default Booking;

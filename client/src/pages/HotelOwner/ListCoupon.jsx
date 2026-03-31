@@ -1,3 +1,4 @@
+import logger from "../../utils/logger.js";
 import { useState } from "react";
 import {
   Search,
@@ -40,7 +41,7 @@ const CouponList = () => {
         setLoading(false);
       }
     } catch (error) {
-      console.log(error);
+      logger.info(error);
       setLoading(false);
     } finally {
       setLoading(false);
@@ -59,7 +60,7 @@ const CouponList = () => {
         getAllCoupons();
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.error("Failed to delete coupon");
     }
   };
@@ -132,7 +133,7 @@ const CouponList = () => {
         getAllCoupons(); // Refresh the list
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.error("Failed to update coupon status");
     }
   };

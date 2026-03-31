@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import React, { useState } from "react";
 import { assets } from "../assets/assets";
 import heroImage from "../assets/heroImage.png";
@@ -18,15 +19,15 @@ const HotelRegister = () => {
     event.preventDefault();
     try {
       const token = await getToken();
-      console.log("Token:", token);
+      logger.info("Token:", token);
 
       if (!token) {
         toast.error("You are not logged in");
         return;
       }
 
-      console.log("Sending request to:", `${API_BASE}/api/hotels`);
-      console.log("Request payload:", {
+      logger.info("Sending request to:", `${API_BASE}/api/hotels`);
+      logger.info("Request payload:", {
         hotelName,
         phoneNumber,
         address,
@@ -43,7 +44,7 @@ const HotelRegister = () => {
         }
       );
 
-      console.log("Response received:", data);
+      logger.info("Response received:", data);
 
       if (data.success) {
         toast.success("Hotel Registered Successfully");
@@ -53,7 +54,7 @@ const HotelRegister = () => {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error in hotel registration:", error);
+      logger.error("Error in hotel registration:", error);
       toast.error(error.response?.data?.message || error.message);
     }
   };

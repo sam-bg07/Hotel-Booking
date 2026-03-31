@@ -1,8 +1,8 @@
+import logger from "../utils/logger.js";
 import React, { useState, useRef } from "react";
 import { Download } from "lucide-react";
 import DownloadTcketUi from "./DownloadTcketUi";
-import { toPng } from "html-to-image";
-import jsPDF from "jspdf";
+import logger from "../utils/logger.js";
 
 const DownloadTcket = ({ booking }) => {
   const ticketRef = useRef();
@@ -11,7 +11,11 @@ const DownloadTcket = ({ booking }) => {
     const node = ticketRef.current;
     if (!node) return;
     try {
-      console.log(node);
+      // Dynamically load heavy dependencies only when clicked
+      const { toPng } = await import("html-to-image");
+      const { default: jsPDF } = await import("jspdf");
+
+      logger.info(node);
       const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
       const img = new window.Image();
 
@@ -28,7 +32,7 @@ const DownloadTcket = ({ booking }) => {
         pdf.save(`MyShows-Ticket-${booking._id.replace(/\s+/g, "-")}.pdf`);
       };
     } catch (err) {
-      console.error("Failed to generate PDF", err);
+      logger.error("Failed to generate PDF", err);
     }
   };
 

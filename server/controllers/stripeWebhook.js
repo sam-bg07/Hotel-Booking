@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import stripe from "stripe";
 import Booking from "../models/Booking.js";
 
@@ -15,7 +16,7 @@ export const stripeWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error("Webhook signature error:", error.message);
+    logger.error("Webhook signature error:", error.message);
     return res.status(400).send(`Webhook Error: ${error.message}`);
   }
 
@@ -25,7 +26,7 @@ export const stripeWebhook = async (req, res) => {
     const bookingId = session.metadata?.bookingId;
 
     if (!bookingId) {
-      console.error("No bookingId found in session metadata");
+      logger.error("No bookingId found in session metadata");
       return res.status(400).json({ success: false, message: "No bookingId" });
     }
 
@@ -35,10 +36,10 @@ export const stripeWebhook = async (req, res) => {
         paymentMethod: "Stripe",
       });
     } catch (err) {
-      console.error("Failed to update booking:", err.message);
+      logger.error("Failed to update booking:", err.message);
     }
   } else {
-    console.log(`Unhandled event type: ${event.type}`);
+    logger.info(`Unhandled event type: ${event.type}`);
   }
 
   res.json({ received: true });

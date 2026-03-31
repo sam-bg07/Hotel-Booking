@@ -1,3 +1,4 @@
+import logger from "./logger.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const connectCloudinary = () => {
@@ -8,8 +9,8 @@ export const connectCloudinary = () => {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
 
-    console.log("✅ Connected to Cloudinary successfully");
+    logger.info("✅ Connected to Cloudinary successfully");
   } catch (error) {
-    console.error("❌ Error configuring Cloudinary:", error);
+    logger.error("❌ Error configuring Cloudinary:", error);
   }
 };

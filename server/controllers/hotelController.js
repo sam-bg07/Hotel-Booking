@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import Hotel from "../models/Hotel.js";
 import User from "../models/User.js";
 import Room from "../models/Room.js";
@@ -33,7 +34,7 @@ export const hotelController = async (req, res) => {
 export const getAllHotels = async (req, res) => {
   try {
     const destination = req.query.destination;
-    // console.log("Searching for hotels in:", destination);
+    // logger.info("Searching for hotels in:", destination);
 
     // Step 1: Find hotels matching destination in address
     const hotels = await Hotel.find({

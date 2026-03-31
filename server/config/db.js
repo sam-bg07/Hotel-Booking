@@ -1,3 +1,4 @@
+import logger from "./logger.js";
 import mongoose from "mongoose";
 import cron from "node-cron";
 import Coupon from "../models/Coupon.js"; // Adjust the import path as necessary
@@ -8,9 +9,9 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 10000,
     });
     mongoose.connection.on("connected", () =>
-      console.log("Database connected")
+      logger.info("Database connected")
     );
-    console.log("MongoDB connected successfully");
+    logger.info("MongoDB connected successfully");
 
     cron.schedule("0 0 * * *", async () => {
       const now = new Date();
@@ -24,10 +25,10 @@ const connectDB = async () => {
         },
         { $set: { isActive: false } }
       );
-      console.log("Coupon status updated (via cron job)");
+      logger.info("Coupon status updated (via cron job)");
     });
   } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
+    logger.error("MongoDB connection failed:", error.message);
     process.exit(1); // Exit the process with failure
   }
 };

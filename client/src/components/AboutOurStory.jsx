@@ -161,7 +161,7 @@ export const AboutOurStory = () => {
           {/* Right Side - Image */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <img
+              <img loading="lazy"
                 src={assets.ourstory}
                 alt="QuickStay team working together in modern office"
                 className="w-full h-[600px] object-cover"

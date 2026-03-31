@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import ExperienceAnimatedSection from "./ExperienceAnimatedSection";
@@ -80,7 +81,7 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
       }
 
       if (bookings.length === 0) {
-        console.log("You must book a hotel room before booking an experience.");
+        logger.info("You must book a hotel room before booking an experience.");
         return;
       }
 
@@ -90,13 +91,13 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
         ...formData,
         bookingId: latestBooking._id,
       };
-      console.log("Submitting experience booking:", payload);
+      logger.info("Submitting experience booking:", payload);
       const { data } = await axios.post("/api/experiences", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Experience booking response:", data);
+      logger.info("Experience booking response:", data);
       if (data.success) {
         toast.success(data.message);
         reset();
@@ -104,7 +105,7 @@ const ExperienceBookingForm = ({ selectedExperience }) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log("Error occurred during experience booking:", error.message);
+      logger.info("Error occurred during experience booking:", error.message);
     }
   };
 

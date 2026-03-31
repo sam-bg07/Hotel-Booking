@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useParams } from "react-router-dom";
 import { UseAppContext } from "../context/AppContext.jsx";
@@ -71,15 +71,18 @@ const RoomDetails = () => {
 
   useEffect(() => {
     const fetchRoomDetails = async () => {
-      const room = await rooms.find((room) => room._id === id);
-      if (!room) {
-        return;
+      try {
+        const { data } = await axios.get(`/api/rooms/single/${id}`);
+        if (data.success && data.room) {
+          setRoom(data.room);
+          setMainImage(data.room.images[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching room details", error);
       }
-      (await room) && setRoom(room);
-      (await room) && setMainImage(room.images[0]);
     };
     fetchRoomDetails();
-  }, [rooms, id]);
+  }, [id]);
 
   const {
     register,
@@ -120,7 +123,7 @@ const RoomDetails = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!res.data.success) {
@@ -170,7 +173,7 @@ const RoomDetails = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (bookRes.data.success) {
@@ -231,7 +234,7 @@ const RoomDetails = () => {
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 mb-16 px-4 md:px-10 ">
           {/* Main Image Section */}
           <div className="lg:w-1/2 w-full">
-            <img
+            <img loading="lazy"
               src={mainImage}
               alt="Main room"
               className="w-full min-h-[270px] mt-6 md:mt-10 lg:mt-0 mx-auto rounded-xl shadow-xl object-cover max-h-[500px]"
@@ -246,7 +249,7 @@ const RoomDetails = () => {
 
             <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               {room.images.map((image, index) => (
-                <img
+                <img loading="lazy"
                   key={index}
                   src={image}
                   alt={`Room image ${index + 1}`}
@@ -296,7 +299,7 @@ const RoomDetails = () => {
 
         <form
           onSubmit={handleSubmit(
-            isAvailable ? bookNowHandler : checkAvailabilityHandler
+            isAvailable ? bookNowHandler : checkAvailabilityHandler,
           )}
           className="mt-16 bg-white rounded-2xl px-6 md:px-16 lg:px-24 xl:px-36 py-8 shadow-lg max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 flex-wrap"
         >
@@ -390,8 +393,8 @@ const RoomDetails = () => {
               {isAvailable
                 ? "Book Now"
                 : isChecking
-                ? "Checking..."
-                : "Check Availability"}
+                  ? "Checking..."
+                  : "Check Availability"}
             </button>
           </div>
         </form>
@@ -421,4 +424,4 @@ const RoomDetails = () => {
   );
 };
 
-export default RoomDetails;
+export default memo(RoomDetails);

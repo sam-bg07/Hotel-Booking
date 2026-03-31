@@ -1,9 +1,9 @@
-import React from "react";
+import React, { memo } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Instagram, Twitter, Facebook, Globe, Dribbble } from "lucide-react";
 import { assets } from "../assets/assets"; // Adjust the import path as necessary
 
-const Footer = () => {
+const Footer = memo(() => {
   const linkGroups = [
     {
       title: "Company",
@@ -106,6 +106,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;

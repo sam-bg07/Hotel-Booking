@@ -1,3 +1,4 @@
+import logger from "../../utils/logger.js";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { UseAppContext } from "../../context/AppContext";
@@ -55,7 +56,7 @@ const AddRoomForm = () => {
         }
       });
       for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+        logger.info(`${key}:`, value);
       }
 
       const { data: responseData } = await axios.post("/api/rooms", formData, {
@@ -72,7 +73,7 @@ const AddRoomForm = () => {
         toast.error(responseData.message);
       }
     } catch (error) {
-      console.error(error.message);
+      logger.error(error.message);
       toast.error(error.message);
     } finally {
       setIsLoading(false);

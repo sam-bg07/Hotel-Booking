@@ -29,8 +29,11 @@ const roomSchema = new mongoose.Schema(
       default: true, // Default availability status
     },
   },
-  { timestamps: true } // adds createdAt and updatedAt
+  { timestamps: true }, // adds createdAt and updatedAt
 );
+
+// Indexes
+roomSchema.index({ hotel: 1 });
 
 const Room = mongoose.model("Room", roomSchema);
 export default Room;

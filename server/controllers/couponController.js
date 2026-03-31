@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import Booking from "../models/Booking.js";
 import Coupon from "../models/Coupon.js";
 import Hotel from "../models/Hotel.js";
@@ -19,11 +20,11 @@ export const validateCoupon = async (req, res, next) => {
 
   if (!couponCod) {
     // No coupon provided, skip validation
-    console.log("No coupon provided, skipping validation");
+    logger.info("No coupon provided, skipping validation");
   }
 
   try {
-    console.log("Validating coupon with request body:", req.body);
+    logger.info("Validating coupon with request body:", req.body);
     let couponCode, bookingId;
 
     // If both fields exist, destructure them
@@ -32,19 +33,19 @@ export const validateCoupon = async (req, res, next) => {
     }
 
     // If `req.body.coupon` exists, override `couponCode`
-    console.log("req.body.coupon:", req.body.coupon);
+    logger.info("req.body.coupon:", req.body.coupon);
     if (req.body.coupon) {
       const coupon = req.body.coupon;
-      console.log("Validating coupon:", coupon);
+      logger.info("Validating coupon:", coupon);
       const couponCod = await Coupon.findById(coupon);
       couponCode = couponCod.couponCode;
     }
 
-    console.log("Validating coupon code:", couponCode, bookingId);
+    logger.info("Validating coupon code:", couponCode, bookingId);
     const coupon = await Coupon.find({ couponCode, isActive: true })
       .populate("hotel")
       .exec();
-    console.log("Coupon found:", coupon);
+    logger.info("Coupon found:", coupon);
     if (coupon.length > 0) {
       const booking = await Booking.findById(bookingId);
       if (!booking) {
@@ -70,7 +71,7 @@ export const validateCoupon = async (req, res, next) => {
         //   isPaid: false,
         // });
         return next();
-        // console.log("Booking not found");
+        // logger.info("Booking not found");
         // return res.json({
         //   success: false,
         //   message: "Booking not found",
@@ -80,19 +81,19 @@ export const validateCoupon = async (req, res, next) => {
       const originalPrice = booking.originalPrice;
       const discountedPrice =
         originalPrice - (originalPrice * coupon[0].discountValue) / 100;
-      console.log("Discounted price:", discountedPrice);
+      logger.info("Discounted price:", discountedPrice);
 
       // Update the booking with discounted price
       const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,
         { $set: { discountedPrice, isdiscounted: true } },
-        { new: true } // Return the updated document
+        { new: true }, // Return the updated document
       );
 
       const updatedCoupon = await Coupon.findByIdAndUpdate(
         coupon[0]._id,
         { $set: { redeemedCount: coupon[0].redeemedCount + 1 } },
-        { new: true } // Return the updated document
+        { new: true }, // Return the updated document
       );
 
       return res.json({
@@ -104,7 +105,7 @@ export const validateCoupon = async (req, res, next) => {
     }
 
     if (!coupon || coupon.length === 0) {
-      console.log("Coupon not found or inactive");
+      logger.info("Coupon not found or inactive");
       // If coupon is invalid, ensure booking is not marked as discounted
       const booking = await Booking.findById(bookingId);
       if (booking) {
@@ -118,18 +119,31 @@ export const validateCoupon = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error("Error validating coupon:", error);
+    logger.error("Error validating coupon:", error);
     res.json({ success: false, message: error.message });
   }
 };
 
 export const getAllCoupons = async (req, res) => {
   try {
-    const coupons = await Coupon.find({}).populate("hotel").exec();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const coupons = await Coupon.find({})
+      .populate("hotel")
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const totalCoupons = await Coupon.countDocuments();
+
     res.json({
       success: true,
       message: "Coupons fetched successfully",
       coupons,
+      page,
+      totalPages: Math.ceil(totalCoupons / limit),
     });
   } catch (error) {
     res.json({ success: false, message: error.message });

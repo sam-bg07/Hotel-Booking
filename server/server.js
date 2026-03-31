@@ -1,3 +1,6 @@
+import compression from "compression";
+import rateLimit from "express-rate-limit";
+import logger from "./config/logger.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -12,6 +15,7 @@ import experienceRouter from "./routes/experienceRouter.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 import { stripeWebhook } from "./controllers/stripeWebhook.js";
 import couponRouter from "./routes/couponRouter.js";
+import agentRoutes from "./routes/agentRoutes.js";
 
 dotenv.config(); // Load .env variables
 
@@ -24,8 +28,21 @@ connectCloudinary();
 app.use(
   "/api/stripe",
   express.raw({ type: "application/json" }),
-  stripeWebhook
+  stripeWebhook,
 );
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    message:
+      "Too many requests from this IP, please try again after 15 minutes",
+  },
+});
+
+app.use(compression()); // gzip compress responses
+app.use("/api/", limiter); // Apply rate limiter to all API routes
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -40,12 +57,13 @@ app.use(
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-  })
+  }),
 );
 
 //api to lisen stripe webhook
 
 app.use(express.json());
+app.use(pinoHttp({ logger }));
 app.use(clerkMiddleware());
 // Define the webhook route
 app.post("/api/clerk", clerkWebhookSecret);
@@ -59,7 +77,8 @@ app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/experiences", experienceRouter);
 app.use("/api/coupon", couponRouter);
+app.use("/api/agent", agentRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });

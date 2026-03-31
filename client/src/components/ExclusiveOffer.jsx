@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import React, { useEffect, useState } from "react";
 import { exclusiveOffers } from "../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -17,7 +18,7 @@ const ExclusiveOffer = () => {
 
       if (data.success) {
         setCoupons(data.coupons);
-        console.log(data.coupons);
+        logger.info(data.coupons);
       } else {
         toast.error(data.message);
       }

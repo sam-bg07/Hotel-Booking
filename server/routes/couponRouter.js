@@ -8,6 +8,7 @@ import {
   validateCoupon,
 } from "../controllers/couponController.js";
 import { authMiddle } from "../middleware/authMiddleware.js";
+import { cacheMiddleware } from "../middleware/cacheMiddleware.js";
 const couponRouter = express.Router();
 
 couponRouter.post("/", authMiddle, createCoupon);
@@ -16,6 +17,6 @@ couponRouter.get("/getallcoupons", authMiddle, getAllCoupons);
 couponRouter.delete("/deletecoupon/:id", authMiddle, deleteCoupon);
 couponRouter.put("/updatecoupon/:id", authMiddle, updatecoupon);
 
-couponRouter.get("/get3coupons", get3Coupons);
+couponRouter.get("/get3coupons", cacheMiddleware, get3Coupons);
 
 export default couponRouter;

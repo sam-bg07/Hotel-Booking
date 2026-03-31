@@ -1,10 +1,28 @@
+import { useState, useEffect, memo } from "react";
 import HotelCard from "./HotelCard";
 import { UseAppContext } from "../context/AppContext";
+import axios from "axios";
 
 const HotelCardFeatured = () => {
-  const { rooms, navigate } = UseAppContext(); // Accessing roomsDummyData from context
+  const { navigate } = UseAppContext();
+  const [featuredRooms, setFeaturedRooms] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const { data } = await axios.get("/api/rooms?limit=4&page=1");
+        if (data.success) {
+          setFeaturedRooms(data.rooms);
+        }
+      } catch (error) {
+        console.error("Error fetching featured rooms", error);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
   return (
-    rooms.length > 0 && (
+    featuredRooms.length > 0 && (
       <div className="mt-20 flex flex-col items-center  text-center ">
         <p>
           <span className="text-4xl md:text-5xl font-stretch-500%">
@@ -21,7 +39,7 @@ const HotelCardFeatured = () => {
 
         {/* hotel card  */}
         <div className="px-6 md:px-16 lg:px-24 flex flex-wrap justify-center gap-4 mt-10 md:mt-20 w-full">
-          {rooms.map((room, index) => (
+          {featuredRooms.map((room, index) => (
             <HotelCard key={room._id} room={room} />
           ))}
         </div>
@@ -41,4 +59,4 @@ const HotelCardFeatured = () => {
   );
 };
 
-export default HotelCardFeatured;
+export default memo(HotelCardFeatured);

@@ -52,7 +52,11 @@ const CouponSchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+// Indexes
+CouponSchema.index({ hotel: 1 });
+
 const Coupon = mongoose.model("Coupon", CouponSchema);
 export default Coupon;

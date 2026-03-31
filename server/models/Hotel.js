@@ -28,8 +28,11 @@ const hotelSchema = new mongoose.Schema(
       ref: "User", // Reference to User model
     },
   },
-  { timestamps: true } // adds createdAt and updatedAt
+  { timestamps: true }, // adds createdAt and updatedAt
 );
+
+// Indexes
+hotelSchema.index({ owner: 1 });
 
 const Hotel = mongoose.model("Hotel", hotelSchema);
 export default Hotel;

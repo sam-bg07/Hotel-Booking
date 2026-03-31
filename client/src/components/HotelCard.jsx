@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { assets } from "../assets/assets";
 import { NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,7 @@ const HotelCard = ({ room, index }) => {
       <img
         src={room?.images[0]}
         alt="firstImage"
+        loading="lazy"
         className="rounded-t-xl min-h-[200px]"
       />
       <p className=" absolute  top-0 left-0 m-2 px-2 py-1 text-white bg-black/60 text-sm rounded">
@@ -57,4 +58,4 @@ const HotelCard = ({ room, index }) => {
   );
 };
 
-export default HotelCard;
+export default memo(HotelCard);

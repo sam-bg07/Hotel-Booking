@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import User from "../models/User.js";
 
 import { Webhook } from "svix";
@@ -18,7 +19,7 @@ export const clerkWebhookSecret = async (req, res) => {
 
     const { data, type } = payload;
 
-    // console.log("Webhook event received:", type);
+    // logger.info("Webhook event received:", type);
 
     if (type === "user.created") {
       const user = new User({
@@ -32,7 +33,7 @@ export const clerkWebhookSecret = async (req, res) => {
       });
 
       await user.save();
-      // console.log("User created:", user);
+      // logger.info("User created:", user);
     } else if (type === "user.updated") {
       await User.findByIdAndUpdate(
         data.id,
@@ -46,15 +47,15 @@ export const clerkWebhookSecret = async (req, res) => {
         },
         { new: true }
       );
-      // console.log("User updated:", data.id);
+      // logger.info("User updated:", data.id);
     } else if (type === "user.deleted") {
       await User.findByIdAndDelete(data.id);
-      // console.log("User deleted:", data.id);
+      // logger.info("User deleted:", data.id);
     }
 
     res.status(200).json({ message: "Webhook processed successfully" });
   } catch (error) {
-    console.error("Error processing Clerk webhook:", error.message);
+    logger.error("Error processing Clerk webhook:", error.message);
     res.status(500).json({
       message: "Error processing webhook",
       error: error.message,

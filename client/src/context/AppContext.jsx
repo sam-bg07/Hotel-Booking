@@ -1,9 +1,9 @@
 import React, {
   createContext,
-  use,
   useContext,
   useEffect,
   useState,
+  useMemo,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useAuth } from "@clerk/clerk-react";
@@ -30,7 +30,8 @@ export const AppProvider = ({ children }) => {
   const fetchRooms = async () => {
     try {
       setIsLoadingRooms(true);
-      const { data } = await axios.get(`${API_BASE}/api/rooms`);
+      // Fetch initial subset of rooms instead of all rooms for global context
+      const { data } = await axios.get(`${API_BASE}/api/rooms?limit=4&page=1`);
       if (data.success) {
         setRooms(data.rooms);
         setIsLoadingRooms(false);
@@ -74,7 +75,7 @@ export const AppProvider = ({ children }) => {
 
   const fetchexperience = async () => {
     try {
-      const { data } = await axios.get("/api/experiences");
+      const { data } = await axios.get("/api/experiences?limit=10&page=1");
 
       if (data.success) {
         setExperience(data.experienceBookings);
@@ -100,23 +101,38 @@ export const AppProvider = ({ children }) => {
     fetchexperience();
   }, []);
 
-  const value = {
-    currency,
-    navigate,
-    user,
-    getToken,
-    isOwner,
-    setIsOwner,
-    showHotelReg,
-    setShowHotelReg,
-    isLoadingUser,
-    rooms,
-    setRooms,
-    isLoadingrooms,
-    setIsLoadingRooms,
-    experience,
-    setExperience,
-  };
+  const value = useMemo(
+    () => ({
+      currency,
+      navigate,
+      user,
+      getToken,
+      isOwner,
+      setIsOwner,
+      showHotelReg,
+      setShowHotelReg,
+      isLoadingUser,
+      rooms,
+      setRooms,
+      isLoadingrooms,
+      setIsLoadingRooms,
+      experience,
+      setExperience,
+    }),
+    [
+      currency,
+      navigate,
+      user,
+      getToken,
+      isOwner,
+      showHotelReg,
+      isLoadingUser,
+      rooms,
+      isLoadingrooms,
+      experience,
+    ],
+  );
+
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 

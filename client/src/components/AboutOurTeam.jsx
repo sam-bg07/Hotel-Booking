@@ -56,7 +56,7 @@
 //               key={index}
 //               className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
 //             >
-//               <img
+//               <img loading="lazy"
 //                 src={member.image || "/placeholder.svg"}
 //                 alt={`${member.name} - ${member.role}`}
 //                 className="w-full h-64 object-cover"
@@ -155,7 +155,7 @@ export const AboutOurTeam = () => {
               key={index}
               className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-gray-200/50 hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
-              <img
+              <img loading="lazy"
                 src={member.image || "/placeholder.svg"}
                 alt={`${member.name} - ${member.role}`}
                 className="w-full h-64 object-cover"

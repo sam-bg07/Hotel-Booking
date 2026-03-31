@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import logger from "../utils/logger.js";
+import React, { useEffect, useState, memo } from "react";
+
 import {
   Calendar,
   Check,
@@ -37,9 +39,9 @@ const MyBooking = () => {
         },
       });
       if (data.success) {
-        console.log(data);
+        logger.info(data);
         setUserBookings(data.bookings);
-        // console.log(data.bookings[0].isdiscounted);
+        // logger.info(data.bookings[0].isdiscounted);
         setLoading(false);
       } else {
         toast.error(data.message);
@@ -59,8 +61,8 @@ const MyBooking = () => {
         finalPrice !== null
           ? finalPrice
           : selectedBooking?.isdiscounted
-          ? selectedBooking.discountedPrice
-          : selectedBooking.originalPrice;
+            ? selectedBooking.discountedPrice
+            : selectedBooking.originalPrice;
 
       const { data } = await axios.post(
         "/api/bookings/stripe-payment",
@@ -69,7 +71,7 @@ const MyBooking = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (data.success) {
@@ -92,9 +94,9 @@ const MyBooking = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      console.log(data);
+      logger.info(data);
       if (data.success) {
         toast.success(data.message);
         setAppliedCoupon(data.coupon);
@@ -164,8 +166,8 @@ const MyBooking = () => {
     const finalPrice = appliedCoupon
       ? calculateDiscountedPrice(selectedBooking.originalPrice, appliedCoupon)
       : selectedBooking.isdiscounted
-      ? selectedBooking.discountedPrice
-      : selectedBooking.originalPrice;
+        ? selectedBooking.discountedPrice
+        : selectedBooking.originalPrice;
 
     handlePayment(selectedBooking._id, finalPrice);
     handleClosePopup();
@@ -206,7 +208,7 @@ const MyBooking = () => {
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-6">
                 {/* Hotel Image */}
                 <div className="relative">
-                  <img
+                  <img loading="lazy"
                     src={
                       (booking.room &&
                         booking.room.images &&
@@ -276,7 +278,7 @@ const MyBooking = () => {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </span>
                       </div>
@@ -295,7 +297,7 @@ const MyBooking = () => {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </span>
                       </div>
@@ -334,7 +336,7 @@ const MyBooking = () => {
             {/* Desktop Layout */}
             <div className="hidden md:block w-full px-2">
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4">
-                <img
+                <img loading="lazy"
                   src={
                     (booking.room &&
                       booking.room.images &&
@@ -455,7 +457,7 @@ const MyBooking = () => {
             <div className="p-6 space-y-6">
               {/* Hotel Info */}
               <div className="flex items-center space-x-4">
-                <img
+                <img loading="lazy"
                   src={
                     (selectedBooking.room &&
                       selectedBooking.room.images &&
@@ -490,7 +492,7 @@ const MyBooking = () => {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
-                      }
+                      },
                     )}
                   </span>
                 </div>
@@ -503,7 +505,7 @@ const MyBooking = () => {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
-                      }
+                      },
                     )}
                   </span>
                 </div>
@@ -635,7 +637,7 @@ const MyBooking = () => {
                         {appliedCoupon
                           ? calculateDiscountedPrice(
                               selectedBooking.originalPrice,
-                              appliedCoupon
+                              appliedCoupon,
                             ).toFixed(2)
                           : selectedBooking.discountedPrice.toFixed(2)}
                       </span>
@@ -666,4 +668,4 @@ const MyBooking = () => {
   );
 };
 
-export default MyBooking;
+export default memo(MyBooking);

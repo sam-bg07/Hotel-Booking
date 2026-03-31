@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import Booking from "../models/Booking.js";
 import Room from "../models/Room.js";
 import Hotel from "../models/Hotel.js";
@@ -5,6 +6,7 @@ import User from "../models/User.js";
 import transporter from "../config/nodeMailer.js";
 import stripe from "stripe";
 import Coupon from "../models/Coupon.js";
+import { dispatchBookingEmail } from "../services/emailService.js";
 
 const checkAvailability = async ({ room, checkInDate, checkOutDate }) => {
   try {
@@ -18,7 +20,7 @@ const checkAvailability = async ({ room, checkInDate, checkOutDate }) => {
     const isAvailable = !existingBooking;
     return isAvailable;
   } catch (error) {
-    console.error("Error checking room availability:", error);
+    logger.error("Error checking room availability:", error);
   }
 };
 
@@ -88,15 +90,15 @@ export const createBooking = async (req, res) => {
 
     totalAmount = totalAmount * nights;
     const totalAmount2 = totalAmount * nights;
-    console.log("Total amount:", totalAmount);
+    logger.info("Total amount:", totalAmount);
     let booking;
     if (couponId) {
       const coupon = await Coupon.findById(couponId);
-      console.log("Coupon:", coupon);
+      logger.info("Coupon:", coupon);
       const discount = (totalAmount * coupon.discountValue) / 100;
-      console.log("Discount:", discount, coupon.discountValue);
+      logger.info("Discount:", discount, coupon.discountValue);
       totalAmount -= discount;
-      console.log("Discounted amount:", totalAmount);
+      logger.info("Discounted amount:", totalAmount);
       booking = await Booking.create({
         user: req.user._id,
         hotel: roomData.hotel,
@@ -114,7 +116,7 @@ export const createBooking = async (req, res) => {
       const updatedCoupon = await Coupon.findByIdAndUpdate(
         coupon._id,
         { $set: { redeemedCount: coupon.redeemedCount + 1 } },
-        { new: true }
+        { new: true },
       );
     } else {
       booking = await Booking.create({
@@ -133,39 +135,15 @@ export const createBooking = async (req, res) => {
 
     const roomData1 = await Room.findById(room).populate("hotel");
 
-    const mailOptions = {
-      from: "samarthgabani2005@gmail.com",
-      to: req.user.email,
-      subject: "Booking Confirmation",
-      html: `
-      <h1>Booking Confirmation</h1>
-      <p>Dear ${req.user.firstName} ${req.user.lastName},</p>
-      <p>Your booking has been confirmed!</p>
-      <ul>
-        <li><strong>Booking ID:</strong> ${booking._id}</li>
-        <li><strong>Hotel:</strong> ${
-          roomData1?.hotel?.hotelName || "Hotel Name"
-        }</li>
-        <li><strong>Location:</strong> ${
-          roomData1?.hotel?.address || "Hotel Address"
-        }</li>
-        <li><strong>Check-in Date:</strong> ${checkIn.toDateString()}</li>
-        <li><strong>Check-out Date:</strong> ${checkOut.toDateString()}</li>
-        <li><strong>Amount:</strong> $${totalAmount}</li>
-      </ul>
-      <p>Need help? Contact us at support@yourdomain.com</p>
-      <p>Thank you for choosing our service!</p>
-      <p>The Hotel Booking Team</p>
-    `,
-    };
-    // console.log(mailOptions);
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Email send failed:", error); // 🔥 this will show SMTP error
-      } else {
-        console.log("Email sent:", info.response); // ✅ shows 250 OK if successful
-      }
-    });
+    // Fire-and-forget: offload email dispatch to background
+    dispatchBookingEmail(
+      req.user,
+      booking,
+      roomData1,
+      totalAmount,
+      checkIn,
+      checkOut,
+    );
 
     res.json({
       success: true,
@@ -182,6 +160,12 @@ export const createBooking = async (req, res) => {
 export const getAllBookingsByUser = async (req, res) => {
   try {
     const userID = req.user._id;
+
+    // Pagination basics
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
     const bookings = await Booking.find({ user: userID })
       .populate([
         { path: "room" },
@@ -189,8 +173,11 @@ export const getAllBookingsByUser = async (req, res) => {
         { path: "user" },
         { path: "coupon" },
       ])
-      .sort({ createdAt: -1 });
-    res.json({ success: true, bookings });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({ success: true, bookings, page, limit });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -204,26 +191,37 @@ export const getAllBookingsByHotel = async (req, res) => {
     if (!hotel) {
       return res.json({ success: false, message: "Hotel not found" });
     }
-    const bookings = await Booking.find({ hotel: hotel._id })
-      .populate("room")
-      .populate("user")
-      .populate("hotel")
-      .sort({ createdAt: -1 });
 
-    const totalBookings = bookings.length;
-    // if (totalBookings === 0) {
-    //   return res.json({
-    //     success: false,
-    //     message: "No bookings found for this hotel",
-    //   });
-    // }
-    const totalRevenue = bookings.reduce(
-      (acc, booking) => acc + booking.originalPrice,
-      0
-    );
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Execute paginated query
+    const bookings = await Booking.find({ hotel: hotel._id })
+      .populate([{ path: "room" }, { path: "user" }, { path: "hotel" }])
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalBookings = await Booking.countDocuments({ hotel: hotel._id });
+
+    // Calculate total revenue at DB level to prevent memory bloat
+    const revenueAggregation = await Booking.aggregate([
+      { $match: { hotel: hotel._id } },
+      { $group: { _id: null, totalRevenue: { $sum: "$originalPrice" } } },
+    ]);
+    const totalRevenue = revenueAggregation[0]?.totalRevenue || 0;
+
     res.json({
       success: true,
-      dashboardData: { totalBookings, totalRevenue, bookings },
+      dashboardData: {
+        totalBookings,
+        totalRevenue,
+        bookings,
+        currentPage: page,
+        totalPages: Math.ceil(totalBookings / limit),
+      },
     });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -233,7 +231,7 @@ export const getAllBookingsByHotel = async (req, res) => {
 export const stripePayment = async (req, res) => {
   try {
     const { bookingId, finalPrice } = req.body;
-    // console.log("Booking ID:", bookingId);
+    // logger.info("Booking ID:", bookingId);
     const booking = await Booking.findById(bookingId);
     const roomData = await Room.findById(booking.room);
     if (!booking || !roomData) {
@@ -244,7 +242,7 @@ export const stripePayment = async (req, res) => {
       finalPrice !== undefined && finalPrice !== null
         ? finalPrice
         : booking.totalPrice;
-    // console.log("Total Amount:", totalAmount);
+    // logger.info("Total Amount:", totalAmount);
     const { origin } = req.headers;
 
     const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);

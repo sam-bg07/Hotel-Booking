@@ -1,52 +1,161 @@
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import { Routes, Route } from "react-router-dom";
-import About from "./pages/About";
-import Footer from "./components/Footer";
-import Hotel from "./pages/Hotel";
-import RoomDetails from "./pages/RoomDetails";
-import MyBooking from "./pages/MyBooking";
-import HotelRegister from "./components/HotelRegister";
-import Layout from "./pages/HotelOwner/Layout";
-import { useLocation } from "react-router-dom";
-import Experience from "./pages/Experience";
-import Dashboard from "./pages/HotelOwner/Dashboard";
-import AddRoom from "./pages/HotelOwner/AddRoom";
-import ListRoom from "./pages/HotelOwner/ListRoom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { UseAppContext } from "./context/AppContext";
 import { Toaster } from "react-hot-toast";
-import Loader from "./components/Loader";
-import AddCouponPage from "./pages/HotelOwner/AddCoupon";
-import CouponList from "./pages/HotelOwner/ListCoupon";
+import { lazy, Suspense } from "react";
+
+// Components
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import {
+  HomeSkeleton,
+  HotelSkeleton,
+  RoomDetailsSkeleton,
+  ExperienceSkeleton,
+  DashboardSkeleton,
+  ListSkeleton,
+  DefaultSkeleton,
+} from "./components/Skeletons";
+
+// Lazy-loaded Components
+const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/About"));
+const Hotel = lazy(() => import("./pages/Hotel"));
+const RoomDetails = lazy(() => import("./pages/RoomDetails"));
+const MyBooking = lazy(() => import("./pages/MyBooking"));
+const Experience = lazy(() => import("./pages/Experience"));
+const Layout = lazy(() => import("./pages/HotelOwner/Layout"));
+const Dashboard = lazy(() => import("./pages/HotelOwner/Dashboard"));
+const AddRoom = lazy(() => import("./pages/HotelOwner/AddRoom"));
+const ListRoom = lazy(() => import("./pages/HotelOwner/ListRoom"));
+const AddCouponPage = lazy(() => import("./pages/HotelOwner/AddCoupon"));
+const CouponList = lazy(() => import("./pages/HotelOwner/ListCoupon"));
+const HotelRegister = lazy(() => import("./components/HotelRegister"));
+const Loader = lazy(() => import("./components/Loader"));
+const ChatBox = lazy(() => import("./components/ChatBox"));
+
 const App = () => {
   const location = useLocation();
   const isOwnerRoute = location.pathname.includes("/owner");
   const { showHotelReg } = UseAppContext();
+
   return (
     <div>
       <Toaster />
       {!isOwnerRoute && <Navbar />}
+
       {showHotelReg && <HotelRegister />}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/hotels" element={<Hotel />} />
-        <Route path="/hotels/:id" element={<RoomDetails />} />
-        <Route path="/experience" element={<Experience />} />
-        <Route path="/my-booking" element={<MyBooking />} />
-        <Route path="/loader/:nextUrl" element={<Loader />} />
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <Home />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <Suspense fallback={<DefaultSkeleton />}>
+              <About />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/hotels"
+          element={
+            <Suspense fallback={<HotelSkeleton />}>
+              <Hotel />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/hotels/:id"
+          element={
+            <Suspense fallback={<RoomDetailsSkeleton />}>
+              <RoomDetails />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/experience"
+          element={
+            <Suspense fallback={<ExperienceSkeleton />}>
+              <Experience />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/my-booking"
+          element={
+            <Suspense fallback={<DefaultSkeleton />}>
+              <MyBooking />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/loader/:nextUrl"
+          element={
+            <Suspense fallback={<DefaultSkeleton />}>
+              <Loader />
+            </Suspense>
+          }
+        />
 
-
-        <Route path="/owner/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="add-room" element={<AddRoom />} />
-          <Route path="list-room" element={<ListRoom />} />
-          <Route path="addcoupon" element={<AddCouponPage />} />
-          <Route path="listcoupon" element={<CouponList />} />
-          {/* Add more owner routes as needed */}
+        <Route
+          path="/owner/"
+          element={
+            <Suspense fallback={<DefaultSkeleton />}>
+              <Layout />
+            </Suspense>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<DashboardSkeleton />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="add-room"
+            element={
+              <Suspense fallback={<DashboardSkeleton />}>
+                <AddRoom />
+              </Suspense>
+            }
+          />
+          <Route
+            path="list-room"
+            element={
+              <Suspense fallback={<ListSkeleton />}>
+                <ListRoom />
+              </Suspense>
+            }
+          />
+          <Route
+            path="addcoupon"
+            element={
+              <Suspense fallback={<DashboardSkeleton />}>
+                <AddCouponPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="listcoupon"
+            element={
+              <Suspense fallback={<ListSkeleton />}>
+                <CouponList />
+              </Suspense>
+            }
+          />
         </Route>
-        {/* Add more routes as needed */}
       </Routes>
+      <Suspense fallback={null}>
+        <ChatBox />
+      </Suspense>
+
       {!isOwnerRoute && <Footer />}
     </div>
   );

@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
 import Experience from "../models/Experience.js";
@@ -6,7 +7,7 @@ export const createExperienceBooking = async (req, res) => {
   try {
     const { bookingId } = req.body;
 
-    console.log("Creating experience booking for bookingId:", bookingId);
+    logger.info("Creating experience booking for bookingId:", bookingId);
     // 1. Validate bookingId
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return res.status(400).json({
@@ -14,7 +15,7 @@ export const createExperienceBooking = async (req, res) => {
         message: "Invalid booking ID",
       });
     }
-    console.log("Valid bookingId:", bookingId);
+    logger.info("Valid bookingId:", bookingId);
 
     // 2. Check if booking exists
     const booking = await Booking.findById(bookingId);
@@ -24,7 +25,7 @@ export const createExperienceBooking = async (req, res) => {
         success: false,
       });
     }
-    console.log("Booking exists:", booking);
+    logger.info("Booking exists:", booking);
 
     // 3. Prevent duplicate experience bookings
     const alreadyBooked = await Experience.findOne({ bookingId: bookingId });
@@ -34,7 +35,7 @@ export const createExperienceBooking = async (req, res) => {
         success: false,
       });
     }
-    console.log("No duplicate experience booking found");
+    logger.info("No duplicate experience booking found");
 
     // 4. Create the experience
     const experienceBooking = await Experience.create(req.body);
@@ -45,7 +46,7 @@ export const createExperienceBooking = async (req, res) => {
       experienceBooking,
     });
   } catch (error) {
-    console.error("Error creating experience booking:", error);
+    logger.error("Error creating experience booking:", error);
     res.status(500).json({
       message: "Server error",
       success: false,
@@ -55,19 +56,30 @@ export const createExperienceBooking = async (req, res) => {
 
 export const getExperienceBookings = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const experienceBookings = await Experience.find()
       .populate({
         path: "bookingId",
         populate: [{ path: "hotel" }, { path: "user" }],
       })
-      .sort({ rating: -1, createdAt: -1 });
-    console.log("Fetched experience bookings:", experienceBookings);
+      .sort({ rating: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalExperiences = await Experience.countDocuments();
+
     res.status(200).json({
       success: true,
       experienceBookings,
+      totalExperiences,
+      page,
+      totalPages: Math.ceil(totalExperiences / limit),
     });
   } catch (error) {
-    console.error("Error fetching experience bookings:", error);
+    logger.error("Error fetching experience bookings:", error);
     res.status(500).json({
       message: "Server error",
       success: false,

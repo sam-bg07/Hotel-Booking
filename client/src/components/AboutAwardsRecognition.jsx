@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 // import { Trophy, Star, Users, ThumbsUp } from "lucide-react";
 
 // export const AboutAwardsRecognition = () => {
@@ -182,7 +183,7 @@ export const AboutAwardsRecognition = () => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // console.log("entry created", entry);
+          // logger.info("entry created", entry);
         } else {
           setIsVisible(false);
           // resetStats(); // Reset stats when out of viewport

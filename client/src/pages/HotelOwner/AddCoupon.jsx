@@ -1,3 +1,4 @@
+import logger from "../../utils/logger.js";
 import { Plus, Tag, Check, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -54,7 +55,7 @@ const AddCouponPage = ({ editingCoupon, onBack, onSuccess }) => {
   }, [editingCoupon, setValue]);
 
   const onSubmit = async (data) => {
-    console.log(data);
+    logger.info(data);
     try {
       const token = await getToken();
 
