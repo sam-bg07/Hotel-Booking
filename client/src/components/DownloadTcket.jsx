@@ -2,7 +2,6 @@ import logger from "../utils/logger.js";
 import React, { useState, useRef } from "react";
 import { Download } from "lucide-react";
 import DownloadTcketUi from "./DownloadTcketUi";
-import logger from "../utils/logger.js";
 
 const DownloadTcket = ({ booking }) => {
   const ticketRef = useRef();
