@@ -4,6 +4,7 @@ import logger from "./config/logger.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import pinoHttp from "pino-http";
 import connectDB from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import clerkWebhookSecret from "./controllers/clerkWebHooks.js";
