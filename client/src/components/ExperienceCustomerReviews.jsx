@@ -7,9 +7,38 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { UseAppContext } from "../context/AppContext.jsx";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ExperienceCustomerReviews = () => {
- 
+  const { experience, setExperience } = UseAppContext();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const limit = 3;
+
+  const fetchExperienceBookings = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`/api/experiences?page=${currentPage}&limit=${limit}`);
+      if (data.success) {
+        setExperience(data.experienceBookings);
+        setTotalPages(data.totalPages || 1);
+      }
+    } catch (error) {
+      console.error("Error fetching experiences:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExperienceBookings();
+  }, [currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const staggerContainer = {
     hidden: { opacity: 0 },
     visible: {
@@ -19,7 +48,6 @@ const ExperienceCustomerReviews = () => {
       },
     },
   };
-  const { getToken, experience, setExperience } = UseAppContext();
 
   return (
     <ExperienceAnimatedSection className="py-16 px-4 bg-gray-50">
@@ -51,6 +79,41 @@ const ExperienceCustomerReviews = () => {
             <ExperienceCustomerReviewCard key={review._id} review={review} />
           ))}
         </motion.div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12 pb-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`w-10 h-10 flex items-center justify-center rounded-md cursor-pointer transition-colors ${
+                  currentPage === i + 1
+                    ? "bg-black text-white font-bold"
+                    : "border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
     </ExperienceAnimatedSection>
   );

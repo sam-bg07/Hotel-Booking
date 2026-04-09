@@ -90,7 +90,9 @@ const AddCouponPage = ({ editingCoupon, onBack, onSuccess }) => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      const errorMessage =
+        error.response?.data?.message || "Something went wrong. Please try again.";
+      toast.error(errorMessage);
     }
   };
 

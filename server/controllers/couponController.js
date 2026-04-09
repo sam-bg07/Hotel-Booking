@@ -11,113 +11,111 @@ export const createCoupon = async (req, res) => {
     const coupon = await Coupon.create({ hotel: hotelId, ...req.body });
     res.json({ success: true, message: "Coupon created successfully", coupon });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    if (error.code === 11000) {
+      return res.json({
+        success: false,
+        message: "This coupon code already exists. Please use a unique code.",
+      });
+    }
+    logger.error("Error creating coupon:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const validateCoupon = async (req, res, next) => {
-  const couponCod = req.body.coupon;
-
-  if (!couponCod) {
-    // No coupon provided, skip validation
-    logger.info("No coupon provided, skipping validation");
-  }
-
   try {
-    logger.info("Validating coupon with request body:", req.body);
-    let couponCode, bookingId;
+    const {
+      couponCode: bodyCouponCode,
+      bookingId,
+      coupon: couponIdInBody,
+      room: roomId,
+      checkInDate,
+      checkOutDate,
+    } = req.body;
+    let couponCode = bodyCouponCode;
 
-    // If both fields exist, destructure them
-    if (req.body.couponCode && req.body.bookingId) {
-      ({ couponCode, bookingId } = req.body);
+    // Handle initial selection from landing page where ID is passed as 'coupon'
+    if (couponIdInBody && !couponCode) {
+      const couponFromId = await Coupon.findById(couponIdInBody);
+      if (couponFromId) couponCode = couponFromId.couponCode;
     }
 
-    // If `req.body.coupon` exists, override `couponCode`
-    logger.info("req.body.coupon:", req.body.coupon);
-    if (req.body.coupon) {
-      const coupon = req.body.coupon;
-      logger.info("Validating coupon:", coupon);
-      const couponCod = await Coupon.findById(coupon);
-      couponCode = couponCod.couponCode;
+    if (!couponCode) {
+      return next();
     }
 
-    logger.info("Validating coupon code:", couponCode, bookingId);
-    const coupon = await Coupon.find({ couponCode, isActive: true })
-      .populate("hotel")
-      .exec();
-    logger.info("Coupon found:", coupon);
-    if (coupon.length > 0) {
+    logger.info("Validating coupon code:", couponCode);
+    const coupon = await Coupon.findOne({
+      couponCode,
+      isActive: true,
+    }).populate("hotel");
+
+    if (!coupon) {
+      return res.json({
+        success: false,
+        message: "Invalid or inactive coupon",
+      });
+    }
+
+    // Basic Validation: Expiry and Minimum Amount
+    if (new Date() > new Date(coupon.validUntil)) {
+      return res.json({ success: false, message: "Coupon has expired" });
+    }
+
+    if (coupon.usageLimit && coupon.redeemedCount >= coupon.usageLimit) {
+      return res.json({
+        success: false,
+        message: "Coupon usage limit reached",
+      });
+    }
+
+    // --- CASE 1: MANUAL APPLY (Post-Booking) ---
+    if (bookingId) {
       const booking = await Booking.findById(bookingId);
-      if (!booking) {
-        // const roomData = await Room.findById(room);
-        // if (!roomData) {
-        //   return res.json({
-        //     success: false,
-        //     message: "Room not found",
-        //     isAvailable: false,
-        //   });
-        // }
+      if (!booking)
+        return res.json({ success: false, message: "Booking not found" });
 
-        // await Booking.create({
-        //   user: req.user._id,
-        //   hotel: roomData.hotel,
-        //   room: room,
-        //   coupon,
-        //   checkInDate: checkIn,
-        //   checkOutDate: checkOut,
-        //   originalPrice: totalAmount,
-        //   guests: +guests,
-        //   paymentMethod: "Cash",
-        //   isPaid: false,
-        // });
-        return next();
-        // logger.info("Booking not found");
-        // return res.json({
-        //   success: false,
-        //   message: "Booking not found",
-        // });
+      if (
+        coupon.minimumOrderAmount &&
+        booking.originalPrice < coupon.minimumOrderAmount
+      ) {
+        return res.json({
+          success: false,
+          message: `Minimum amount of ${coupon.minimumOrderAmount} required`,
+        });
       }
 
-      const originalPrice = booking.originalPrice;
       const discountedPrice =
-        originalPrice - (originalPrice * coupon[0].discountValue) / 100;
-      logger.info("Discounted price:", discountedPrice);
+        booking.originalPrice -
+        (booking.originalPrice * coupon.discountValue) / 100;
 
-      // Update the booking with discounted price
       const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,
-        { $set: { discountedPrice, isdiscounted: true } },
-        { new: true }, // Return the updated document
+        { $set: { discountedPrice, isdiscounted: true, coupon: coupon._id } },
+        { new: true },
       );
 
-      const updatedCoupon = await Coupon.findByIdAndUpdate(
-        coupon[0]._id,
-        { $set: { redeemedCount: coupon[0].redeemedCount + 1 } },
-        { new: true }, // Return the updated document
-      );
+      await Coupon.findByIdAndUpdate(coupon._id, {
+        $inc: { redeemedCount: 1 },
+      });
 
       return res.json({
         success: true,
         message: "Coupon applied successfully",
-        coupon: coupon[0],
+        coupon,
         booking: updatedBooking,
       });
     }
 
-    if (!coupon || coupon.length === 0) {
-      logger.info("Coupon not found or inactive");
-      // If coupon is invalid, ensure booking is not marked as discounted
-      const booking = await Booking.findById(bookingId);
-      if (booking) {
-        await Booking.findByIdAndUpdate(bookingId, {
-          $set: { isdiscounted: false },
-        });
-      }
-      return res.json({
-        success: false,
-        message: "Coupon not found or inactive",
-      });
+    // --- CASE 2: AUTO-APPLY (Pre-Booking Migration) ---
+    // If it's a creation request, we attach the coupon data to req for the controller
+    if (roomId && checkInDate && checkOutDate) {
+      req.couponData = coupon;
+      return next();
     }
+
+    // If it's neither, we just confirm validity (for validation checks)
+    return res.json({ success: true, message: "Coupon is valid", coupon });
   } catch (error) {
     logger.error("Error validating coupon:", error);
     res.json({ success: false, message: error.message });
@@ -178,22 +176,44 @@ export const updatecoupon = async (req, res) => {
     });
     res.json({ success: true, message: "Coupon updated successfully", coupon });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    if (error.code === 11000) {
+      return res.json({
+        success: false,
+        message: "This coupon code already exists. Please use a unique code.",
+      });
+    }
+    logger.error("Error updating coupon:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const get3Coupons = async (req, res) => {
   try {
-    const coupons = await Coupon.find({})
+    const now = new Date();
+
+    const coupons = await Coupon.find({
+      isActive: true,
+      validFrom: { $lte: now }, // Must have started
+      validUntil: { $gte: now }, // Must not be expired
+      $expr: { $lt: ["$redeemedCount", "$usageLimit"] }, // Usage limit not reached
+    })
+      .sort({
+        discountValue: -1, // Biggest discount first
+        validUntil: 1, // Then, those expiring soonest (urgency factor)
+      })
       .limit(3)
-      .populate("hotel")
-      .sort({ discountValue: 1 });
+      .populate("hotel");
+
     res.json({
       success: true,
-      message: "3 Coupons fetched successfully",
+      message:
+        coupons.length > 0
+          ? "Featured coupons fetched"
+          : "No active coupons found",
       coupons,
     });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    logger.error("Error in get3Coupons:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

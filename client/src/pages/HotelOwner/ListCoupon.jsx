@@ -1,5 +1,5 @@
 import logger from "../../utils/logger.js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -10,9 +10,10 @@ import {
   Edit,
   Trash2,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { UseAppContext } from "../../context/AppContext";
-import { useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import AddCouponPage from "./AddCoupon"; // Import the AddCouponPage component
@@ -28,16 +29,21 @@ const CouponList = () => {
   const [editingCoupon, setEditingCoupon] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
+
   const getAllCoupons = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get("/api/coupon/getallcoupons", {
+      const { data } = await axios.get(`/api/coupon/getallcoupons?page=${currentPage}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
         },
       });
       if (data.success) {
         setCoupons(data.coupons);
+        setTotalPages(data.totalPages || 1);
         setLoading(false);
       }
     } catch (error) {
@@ -46,6 +52,11 @@ const CouponList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const deleteCoupon = async (id) => {
@@ -86,8 +97,10 @@ const CouponList = () => {
   };
 
   useEffect(() => {
-    getAllCoupons();
-  }, []);
+    if (user) {
+      getAllCoupons();
+    }
+  }, [user, currentPage]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -538,6 +551,41 @@ const CouponList = () => {
                 ? "Try adjusting your search or filter criteria"
                 : "Create your first coupon to get started"}
             </p>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`w-10 h-10 flex items-center justify-center rounded-md cursor-pointer transition-colors ${
+                  currentPage === i + 1
+                    ? "bg-blue-600 text-white font-bold"
+                    : "border border-gray-300 hover:bg-gray-100 text-gray-700"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         )}
 
