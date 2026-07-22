@@ -13,6 +13,9 @@ import {
   ExperienceSkeleton,
   DashboardSkeleton,
   ListSkeleton,
+  AboutSkeleton,
+  MyBookingSkeleton,
+  NavbarSkeleton,
   DefaultSkeleton,
 } from "./components/Skeletons";
 
@@ -29,6 +32,7 @@ const AddRoom = lazy(() => import("./pages/HotelOwner/AddRoom"));
 const ListRoom = lazy(() => import("./pages/HotelOwner/ListRoom"));
 const AddCouponPage = lazy(() => import("./pages/HotelOwner/AddCoupon"));
 const CouponList = lazy(() => import("./pages/HotelOwner/ListCoupon"));
+const Profile = lazy(() => import("./pages/HotelOwner/Profile"));
 const HotelRegister = lazy(() => import("./components/HotelRegister"));
 const Loader = lazy(() => import("./components/Loader"));
 const ChatBox = lazy(() => import("./components/ChatBox"));
@@ -41,7 +45,9 @@ const App = () => {
   return (
     <div>
       <Toaster />
-      {!isOwnerRoute && <Navbar />}
+      <Suspense fallback={<NavbarSkeleton />}>
+        {!isOwnerRoute && <Navbar />}
+      </Suspense>
 
       {showHotelReg && <HotelRegister />}
       <Routes>
@@ -56,7 +62,7 @@ const App = () => {
         <Route
           path="/about"
           element={
-            <Suspense fallback={<DefaultSkeleton />}>
+            <Suspense fallback={<AboutSkeleton />}>
               <About />
             </Suspense>
           }
@@ -88,7 +94,7 @@ const App = () => {
         <Route
           path="/my-booking"
           element={
-            <Suspense fallback={<DefaultSkeleton />}>
+            <Suspense fallback={<MyBookingSkeleton />}>
               <MyBooking />
             </Suspense>
           }
@@ -147,6 +153,14 @@ const App = () => {
             element={
               <Suspense fallback={<ListSkeleton />}>
                 <CouponList />
+              </Suspense>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <Suspense fallback={<DashboardSkeleton />}>
+                <Profile />
               </Suspense>
             }
           />

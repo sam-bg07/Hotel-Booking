@@ -81,57 +81,55 @@ export const createBooking = async (req, res) => {
         isAvailable: false,
       });
     }
-    let totalAmount = roomData.price;
 
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
     const timeDiffernce = checkOut.getTime() - checkIn.getTime();
     const nights = Math.ceil(timeDiffernce / (1000 * 3600 * 24));
 
-    totalAmount = totalAmount * nights;
-    const totalAmount2 = totalAmount * nights;
-    logger.info("Total amount:", totalAmount);
-    let booking;
-    if (couponId) {
-      const coupon = await Coupon.findById(couponId);
-      logger.info("Coupon:", coupon);
-      const discount = (totalAmount * coupon.discountValue) / 100;
-      logger.info("Discount:", discount, coupon.discountValue);
-      totalAmount -= discount;
-      logger.info("Discounted amount:", totalAmount);
-      booking = await Booking.create({
-        user: req.user._id,
-        hotel: roomData.hotel,
-        room: room,
-        coupon: couponId,
-        checkInDate: checkIn,
-        checkOutDate: checkOut,
-        originalPrice: totalAmount2,
-        discountedPrice: totalAmount,
-        isdiscounted: true,
-        guests: +guests,
-        paymentMethod: "Cash",
-        isPaid: false,
-      });
-      const updatedCoupon = await Coupon.findByIdAndUpdate(
-        coupon._id,
-        { $set: { redeemedCount: coupon.redeemedCount + 1 } },
-        { new: true },
-      );
-    } else {
-      booking = await Booking.create({
-        user: req.user._id,
-        hotel: roomData.hotel,
-        room: room,
-        coupon: couponId,
-        checkInDate: checkIn,
-        checkOutDate: checkOut,
-        originalPrice: totalAmount2,
-        guests: +guests,
-        paymentMethod: "Cash",
-        isPaid: false,
-      });
+    const totalAmount = roomData.price * nights;
+    logger.info("Total amount calculation:", { price: roomData.price, nights, totalAmount });
+    
+    let finalAmount = totalAmount;
+    let appliedCouponId = null;
+    let isDiscounted = false;
+
+    // Use coupon data if validated by middleware
+    if (req.couponData) {
+      const coupon = req.couponData;
+      
+      // Additional safety check for minimum amount and expiry
+      const isStillValid = new Date() <= new Date(coupon.validUntil) && 
+                          (!coupon.minimumOrderAmount || totalAmount >= coupon.minimumOrderAmount);
+
+      if (isStillValid) {
+        const discount = (totalAmount * coupon.discountValue) / 100;
+        finalAmount = totalAmount - discount;
+        appliedCouponId = coupon._id;
+        isDiscounted = true;
+        
+        // Increment redemption count
+        await Coupon.findByIdAndUpdate(coupon._id, { $inc: { redeemedCount: 1 } });
+        logger.info("Coupon applied during creation:", { code: coupon.couponCode, discount });
+      } else {
+        logger.warn("Coupon failed final validation", { code: coupon.couponCode });
+      }
     }
+
+    const booking = await Booking.create({
+      user: req.user._id,
+      hotel: roomData.hotel,
+      room: room,
+      coupon: appliedCouponId,
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      originalPrice: totalAmount,
+      discountedPrice: isDiscounted ? finalAmount : undefined,
+      isdiscounted: isDiscounted,
+      guests: +guests,
+      paymentMethod: "Cash",
+      isPaid: false,
+    });
 
     const roomData1 = await Room.findById(room).populate("hotel");
 
@@ -140,7 +138,7 @@ export const createBooking = async (req, res) => {
       req.user,
       booking,
       roomData1,
-      totalAmount,
+      finalAmount, // Pass the final amount (discounted or not)
       checkIn,
       checkOut,
     );
@@ -149,10 +147,10 @@ export const createBooking = async (req, res) => {
       success: true,
       message: "Booking created successfully",
       booking,
-      isAvailable: true,
     });
   } catch (error) {
-    res.json({ success: false, message: error.message, isAvailable: false });
+    logger.error("Error creating booking:", error);
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -163,9 +161,11 @@ export const getAllBookingsByUser = async (req, res) => {
 
     // Pagination basics
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const totalBookings = await Booking.countDocuments({ user: userID });
+    
     const bookings = await Booking.find({ user: userID })
       .populate([
         { path: "room" },
@@ -177,7 +177,13 @@ export const getAllBookingsByUser = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ success: true, bookings, page, limit });
+    res.json({ 
+      success: true, 
+      bookings, 
+      totalBookings,
+      totalPages: Math.ceil(totalBookings / limit),
+      currentPage: page 
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -197,14 +203,14 @@ export const getAllBookingsByHotel = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const totalBookings = await Booking.countDocuments({ hotel: hotel._id });
+
     // Execute paginated query
     const bookings = await Booking.find({ hotel: hotel._id })
       .populate([{ path: "room" }, { path: "user" }, { path: "hotel" }])
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
-    const totalBookings = await Booking.countDocuments({ hotel: hotel._id });
 
     // Calculate total revenue at DB level to prevent memory bloat
     const revenueAggregation = await Booking.aggregate([

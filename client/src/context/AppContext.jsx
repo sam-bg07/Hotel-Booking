@@ -19,6 +19,7 @@ export const AppProvider = ({ children }) => {
   const { getToken } = useAuth();
 
   const [isOwner, setIsOwner] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoadingrooms, setIsLoadingRooms] = useState(true);
   const [showHotelReg, setShowHotelReg] = useState(false);
@@ -50,7 +51,6 @@ export const AppProvider = ({ children }) => {
     try {
       const token = await getToken();
       if (!token) {
-        toast.error("You are not logged in");
         setIsLoadingUser(false);
         return;
       }
@@ -61,29 +61,12 @@ export const AppProvider = ({ children }) => {
       });
       if (data.success) {
         setIsOwner(data.roles === "hotelOwner");
-      } else {
-        setTimeout(() => {
-          fetchUser();
-        }, 3000);
+        setUserData(data.user);
       }
     } catch (error) {
-      toast.error(error.message || "Something went wrong");
+      console.error("Error in fetchUser:", error);
     } finally {
-      setIsLoadingUser(false); // ALWAYS set loading to false
-    }
-  };
-
-  const fetchexperience = async () => {
-    try {
-      const { data } = await axios.get("/api/experiences?limit=10&page=1");
-
-      if (data.success) {
-        setExperience(data.experienceBookings);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
+      setIsLoadingUser(false);
     }
   };
 
@@ -92,13 +75,12 @@ export const AppProvider = ({ children }) => {
       fetchUser();
     } else {
       setIsOwner(false);
-      setIsLoadingUser(false); // Set loading to false if no user
+      setIsLoadingUser(false);
     }
   }, [user]);
 
   useEffect(() => {
     fetchRooms();
-    fetchexperience();
   }, []);
 
   const value = useMemo(
@@ -109,6 +91,8 @@ export const AppProvider = ({ children }) => {
       getToken,
       isOwner,
       setIsOwner,
+      userData,
+      setUserData,
       showHotelReg,
       setShowHotelReg,
       isLoadingUser,
@@ -125,6 +109,7 @@ export const AppProvider = ({ children }) => {
       user,
       getToken,
       isOwner,
+      userData,
       showHotelReg,
       isLoadingUser,
       rooms,

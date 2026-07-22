@@ -18,6 +18,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Loading from "../components/Loading.jsx";
 import DownloadTcket from "../components/DownloadTcket.jsx";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const MyBooking = () => {
   const { user, getToken } = UseAppContext();
@@ -29,19 +30,22 @@ const MyBooking = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
+
   const fetchUserBookings = async () => {
     try {
       setLoading(true);
       const token = await getToken();
-      const { data } = await axios.get("/api/bookings/user", {
+      const { data } = await axios.get(`/api/bookings/user?page=${currentPage}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (data.success) {
-        logger.info(data);
         setUserBookings(data.bookings);
-        // logger.info(data.bookings[0].isdiscounted);
+        setTotalPages(data.totalPages || 1);
         setLoading(false);
       } else {
         toast.error(data.message);
@@ -121,7 +125,12 @@ const MyBooking = () => {
     if (user) {
       fetchUserBookings();
     }
-  }, [user]);
+  }, [user, currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Popup handlers
   const handlePayNow = (booking) => {
@@ -422,6 +431,41 @@ const MyBooking = () => {
             </div>
           </div>
         ))}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12 mb-8">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`w-10 h-10 flex items-center justify-center rounded-md cursor-pointer transition-colors ${
+                  currentPage === i + 1
+                    ? "bg-black text-white font-bold"
+                    : "border border-gray-300 hover:bg-gray-100 text-gray-700"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
       {/* Empty State */}
       {userBookings.length === 0 && (

@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import Loading from "../components/Loading";
+import { HotelSkeleton } from "../components/Skeletons";
+import Loading from "../components/Loading.jsx";
 
 const useQuery = () => new URLSearchParams(useLocation().search);
 
@@ -224,8 +225,7 @@ const Hotel = () => {
     );
   };
 
-  if (isLoading && room.length === 0)
-    return <Loading message={"Loading rooms..."} />;
+  if (isLoading && room.length === 0) return <HotelSkeleton />;
 
   return (
     <div className="mt-20 md:mt-40 px-6 md:px-16 lg:px-20 xl:px-28 flex  max-lg:flex-col-reverse ">
@@ -244,7 +244,6 @@ const Hotel = () => {
             {Math.min(currentPage * limit, totalRooms)} of {totalRooms}
           </p>
         </div>
-
         {isLoading ? (
           <div className="flex justify-center py-16">
             <Loading message="Updating results..." />

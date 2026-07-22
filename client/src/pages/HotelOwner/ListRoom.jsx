@@ -1,27 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UseAppContext } from "../../context/AppContext";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { useEffect } from "react";
 import Loading from "../../components/Loading";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ListRoom = () => {
   const [rooms, setRooms] = useState([]);
   const { getToken, user } = UseAppContext();
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
+
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get("/api/rooms/hotel", {
+      const { data } = await axios.get(`/api/rooms/hotel?page=${currentPage}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
         },
       });
-      const { rooms } = data.rooms;
 
       if (data.success) {
         setRooms(data.rooms);
+        setTotalPages(data.totalPages || 1);
         setLoading(false);
       } else {
         toast.error(data.message);
@@ -32,13 +36,11 @@ const ListRoom = () => {
       setLoading(false);
     }
   };
-  // const toggleRoomStatus = (id) => {
-  //   setRooms(
-  //     rooms.map((room) =>
-  //       room.id === id ? { ...room, isActive: !room.isActive } : room
-  //     )
-  //   );
-  // };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const toggleRoomStatus = async (roomId) => {
     // Optimistically update UI
@@ -78,7 +80,7 @@ const ListRoom = () => {
     if (user) {
       fetchRooms();
     }
-  }, [user]);
+  }, [user, currentPage]);
 
   if (loading) return <Loading />;
 
@@ -220,6 +222,41 @@ const ListRoom = () => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8 mb-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`w-10 h-10 flex items-center justify-center rounded-md cursor-pointer transition-colors ${
+                currentPage === i + 1
+                  ? "bg-blue-600 text-white font-bold"
+                  : "border border-gray-300 hover:bg-gray-100 text-gray-700"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 cursor-pointer"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
