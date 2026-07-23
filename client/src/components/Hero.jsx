@@ -11,6 +11,7 @@ import {
   Navigation,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import heroImage from "../assets/heroImage.png";
 
 const Hero = () => {
   const { getToken, navigate } = UseAppContext();
@@ -43,7 +44,10 @@ const Hero = () => {
   };
 
   return (
-    <div className='h-screen flex  flex-col md:top-0 justify-center items-start text-white px-6 md:px-16 lg:px-24 xl:px-32 bg-[url("/src/assets/heroImage.png")] bg-no-repeat bg-cover '>
+    <div
+      className="h-screen flex flex-col md:top-0 justify-center items-start text-white px-6 md:px-16 lg:px-24 xl:px-32 bg-gray-900 bg-no-repeat bg-cover"
+      style={{ backgroundImage: `url(${heroImage})` }}
+    >
       <p className="bg-[#F0F8FF90] text-black rounded-2xl px-3 py-1 ">
         The Ultimate Hotel Experience
       </p>

@@ -66,10 +66,15 @@ const ExclusiveOffer = () => {
               hoveredCard && hoveredCard !== offer._id
                 ? "opacity-50"
                 : "opacity-100"
-            } max-w-100 flex relative rounded-xl overflow-hidden hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
+            } w-full max-w-sm min-h-[270px] bg-gray-800 flex relative rounded-xl overflow-hidden hover:-translate-y-1 transition-all duration-300 shadow-[0px_1px_3px_rgba(0,0,0,0.4)]`}
           >
-            <img src="landing.jpeg" alt="firstImage" />
-            <div className="absolute inset-0  flex  justify-between items-start flex-col p-4 text-white">
+            <img
+              src="/landing.jpeg"
+              alt="firstImage"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40" />
+            <div className="absolute inset-0  flex  justify-between items-start flex-col p-4 text-white z-10">
               {/* Discount Badge */}
               <span className="bg-gray-900/80 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full self-start">
                 <span className="font-bold">{offer.discountValue}%</span> OFF
